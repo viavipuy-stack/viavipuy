@@ -43,3 +43,6 @@ waitForPort = 5000
 
 [userenv.shared]
 NEXT_PUBLIC_SITE_URL = "https://new-start-goal.replit.app"
+
+[agent]
+expertMode = true
