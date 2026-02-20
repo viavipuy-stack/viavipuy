@@ -49,8 +49,12 @@ export async function POST(req: NextRequest) {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !serviceKey) {
+    const missing: string[] = [];
+    if (!url) missing.push("NEXT_PUBLIC_SUPABASE_URL");
+    if (!serviceKey) missing.push("SUPABASE_SERVICE_ROLE_KEY");
+    console.error(`[upload-media] Missing env vars: ${missing.join(", ")}`);
     return NextResponse.json(
-      { error: "Server config missing" },
+      { error: `Configuracion del servidor incompleta. Faltan: ${missing.join(", ")}. Agregalas en Secrets de Replit.` },
       { status: 500 },
     );
   }

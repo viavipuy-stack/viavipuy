@@ -5729,12 +5729,14 @@ a {
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  z-index: 500;
+  z-index: 9999;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 16px;
   overflow: hidden;
+  -webkit-overflow-scrolling: auto;
+  overscroll-behavior: contain;
   animation: vvf-fadeIn 0.2s ease;
 }
 
@@ -5748,7 +5750,7 @@ a {
   width: 100%;
   max-width: 720px;
   height: min(92dvh, 780px);
-  z-index: 501;
+  z-index: 10000;
   background: #111111;
   border-radius: 20px;
   border: 1px solid rgba(198, 167, 94, 0.25);

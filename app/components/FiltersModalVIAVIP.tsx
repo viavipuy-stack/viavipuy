@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useRouter, usePathname } from "next/navigation";
 import { type Filtros, DEFAULTS, DEPARTAMENTOS, ATIENDE_EN_OPTIONS, buildSearchParams } from "@/lib/filters";
 
@@ -112,24 +113,40 @@ export default function FiltersModalVIAVIP({ open, onClose, filtros, serviciosOp
   const router = useRouter();
   const pathname = usePathname();
   const modalBodyRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
 
   const [local, setLocal] = useState<Filtros>({ ...filtros });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (open) setLocal({ ...filtros });
   }, [open, filtros]);
 
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-      setTimeout(() => {
-        modalBodyRef.current?.scrollTo({ top: 0, behavior: "auto" });
-      }, 0);
-    } else {
-      document.body.style.overflow = "";
-    }
+    if (!open) return;
+
+    const scrollY = window.scrollY;
+    document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+
+    const raf = requestAnimationFrame(() => {
+      modalBodyRef.current?.scrollTo({ top: 0, behavior: "auto" });
+    });
+
     return () => {
+      cancelAnimationFrame(raf);
       document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      window.scrollTo(0, scrollY);
     };
   }, [open]);
 
@@ -159,10 +176,10 @@ export default function FiltersModalVIAVIP({ open, onClose, filtros, serviciosOp
     onClose();
   };
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
-    <div className="vvf-overlay" onClick={onClose}>
+  const modal = (
+    <div className="vvf-overlay" onClick={onClose} data-testid="filters-overlay">
       <div className="vvf-modal" onClick={(e) => e.stopPropagation()} data-testid="filters-modal">
         <div className="vvf-modal-header">
           <h2 className="vvf-modal-title">Filtros</h2>
@@ -256,4 +273,6 @@ export default function FiltersModalVIAVIP({ open, onClose, filtros, serviciosOp
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }
