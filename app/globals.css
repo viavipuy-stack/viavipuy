@@ -2720,6 +2720,24 @@ a {
   margin: 0 0 12px;
 }
 
+.vv-disp-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.vv-disp-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.vv-disp-hint {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+  line-height: 1.4;
+}
+
 .vv-cuenta-row {
   display: flex;
   justify-content: space-between;
@@ -3766,6 +3784,14 @@ a {
   background: #25d366;
   border-radius: 50%;
   animation: vvpPulse 2s ease-in-out infinite;
+}
+
+.vvp-header-activity {
+  font-size: 11px;
+  color: #999;
+  font-weight: 400;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .vvp-header-sub {

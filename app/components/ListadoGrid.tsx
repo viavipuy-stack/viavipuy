@@ -4,6 +4,7 @@ import { useMemo, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getPlanConfig } from "@/lib/plans";
 import { fixStorageUrl } from "@/lib/fixStorageUrl";
+import { isDisponibleAhora } from "@/lib/disponibilidad";
 import { useFavoritos } from "@/hooks/useFavoritos";
 import FavoritoButton from "./FavoritoButton";
 import MiniPreview from "./MiniPreview";
@@ -18,6 +19,7 @@ interface Publicacion {
   fotos?: string[];
   fotos_preview?: string[];
   disponible?: boolean;
+  ultima_actividad?: string;
   rating?: number;
   plan_actual?: string;
 }
@@ -115,7 +117,7 @@ export default function ListadoGrid({ items, basePath }: ListadoGridProps) {
           const nombre = item.nombre || "Sin nombre";
           const edad = item.edad || null;
           const zona = item.zona || item.ciudad || "";
-          const disponible = item.disponible !== undefined ? item.disponible : true;
+          const disponible = isDisponibleAhora(item.disponible, item.ultima_actividad);
           const rating = item.rating != null ? item.rating : 4.8;
           const profileUrl = `${basePath}/${item.id}`;
 

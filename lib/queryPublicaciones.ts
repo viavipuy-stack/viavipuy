@@ -1,5 +1,6 @@
 import { getSupabasePublicClient } from "@/lib/supabasePublic";
 import { getPlanConfig } from "@/lib/plans";
+import { isDisponibleAhora } from "@/lib/disponibilidad";
 import type { Filtros } from "@/lib/filters";
 
 export interface PublicacionItem {
@@ -13,6 +14,7 @@ export interface PublicacionItem {
   fotos_preview?: string[];
   rating?: number;
   disponible?: boolean;
+  ultima_actividad?: string;
   tarifa_hora?: number;
   altura_cm?: number;
   servicios?: string[];
@@ -31,7 +33,7 @@ export async function fetchPublicaciones(
   try {
     let query = supabase
       .from("publicaciones")
-      .select("id,nombre,edad,departamento,zona,cover_url,fotos,fotos_preview,rating,disponible,tarifa_hora,altura_cm,servicios,atiende_en,user_id")
+      .select("id,nombre,edad,departamento,zona,cover_url,fotos,fotos_preview,rating,disponible,ultima_actividad,tarifa_hora,altura_cm,servicios,atiende_en,user_id")
       .eq("estado", "activa")
       .eq("categoria", categoria);
 
@@ -94,8 +96,8 @@ export async function fetchPublicaciones(
       const pa = getPlanConfig(a.plan_actual).ranking_priority;
       const pb = getPlanConfig(b.plan_actual).ranking_priority;
       if (pb !== pa) return pb - pa;
-      const da = a.disponible !== false ? 1 : 0;
-      const db = b.disponible !== false ? 1 : 0;
+      const da = isDisponibleAhora(a.disponible, a.ultima_actividad) ? 1 : 0;
+      const db = isDisponibleAhora(b.disponible, b.ultima_actividad) ? 1 : 0;
       if (db !== da) return db - da;
       return (b.rating || 0) - (a.rating || 0);
     });

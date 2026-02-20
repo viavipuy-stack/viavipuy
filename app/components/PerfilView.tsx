@@ -8,6 +8,7 @@ import { getPlanConfig } from "@/lib/plans";
 import { trackProfileEvent } from "@/lib/trackEvent";
 import { fixStorageUrl } from "@/lib/fixStorageUrl";
 import { makeServiceSlug, slugify } from "@/lib/slugify";
+import { isDisponibleAhora, getActivityLabel } from "@/lib/disponibilidad";
 import { isLocalFavorite, toggleLocalFavorite } from "@/lib/favoritesLocal";
 import StoryViewer from "./StoryViewer";
 import VerticalGallery from "./VerticalGallery";
@@ -24,6 +25,7 @@ interface Publicacion {
   departamento?: string;
   cover_url?: string;
   disponible?: boolean;
+  ultima_actividad?: string;
   rating?: number;
   descripcion?: string;
   user_id?: string;
@@ -686,7 +688,8 @@ export default function PerfilView({ category }: PerfilViewProps) {
   const edad = pub.edad || null;
   const zona = pub.zona || pub.ciudad || "";
   const departamento = pub.departamento || "";
-  const disponible = pub.disponible !== false;
+  const disponible = isDisponibleAhora(pub.disponible, pub.ultima_actividad);
+  const activityLabel = getActivityLabel(pub.ultima_actividad);
   const rating = pub.rating != null ? pub.rating : 4.8;
   const planConfig = getPlanConfig(planId);
   const coverImg = fixStorageUrl(pub.cover_url || "");
@@ -819,14 +822,21 @@ export default function PerfilView({ category }: PerfilViewProps) {
                 <h1 className="vvp-header-name" data-testid="text-nombre">
                   {nombre}
                 </h1>
-                {disponible && (
+                {disponible ? (
                   <span
                     className="vvp-header-online"
                     data-testid="status-disponible"
                   >
                     <span className="vvp-header-online-dot" />
                   </span>
-                )}
+                ) : pub.disponible && activityLabel ? (
+                  <span
+                    className="vvp-header-activity"
+                    data-testid="status-activity"
+                  >
+                    {activityLabel}
+                  </span>
+                ) : null}
               </div>
 
               <div className="vvp-header-sub">

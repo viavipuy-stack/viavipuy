@@ -7,6 +7,8 @@ import { getPlanConfig } from "@/lib/plans";
 import { fixStorageUrl } from "@/lib/fixStorageUrl";
 import MediaGallery from "@/app/components/MediaGallery";
 import FotosPreviewEditor from "@/app/components/FotosPreviewEditor";
+import { updateDisponible } from "@/lib/pingActividad";
+import { useHeartbeat } from "@/hooks/useHeartbeat";
 
 interface ProfileData {
   verification_status?: string;
@@ -130,6 +132,10 @@ export default function MiCuentaPage() {
   const [videoDisponible, setVideoDisponible] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
   const [contactMsg, setContactMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [disponibleSwitch, setDisponibleSwitch] = useState(false);
+  const [togglingDisp, setTogglingDisp] = useState(false);
+
+  useHeartbeat(!!userId && !!pub && disponibleSwitch);
 
   useEffect(() => {
     async function load() {
@@ -183,6 +189,7 @@ export default function MiCuentaPage() {
         setFotosPreview(Array.isArray(p.fotos_preview) ? p.fotos_preview : []);
         setVideos(Array.isArray(p.videos) ? p.videos : []);
         setCoverUrl(p.cover_url || "");
+        setDisponibleSwitch(p.disponible !== false);
         setTags({
           servicios: Array.isArray(p.servicios) ? p.servicios : [],
           fantasias: Array.isArray(p.fantasias) ? p.fantasias : [],
@@ -315,6 +322,16 @@ export default function MiCuentaPage() {
     setSavingContact(false);
   }
 
+  async function handleToggleDisponible(value: boolean) {
+    setTogglingDisp(true);
+    setDisponibleSwitch(value);
+    const ok = await updateDisponible(value);
+    if (!ok) {
+      setDisponibleSwitch(!value);
+    }
+    setTogglingDisp(false);
+  }
+
   async function handleSavePreview(newPreview: string[]) {
     if (!pub || !userId) return;
     const supabase = getSupabase();
@@ -405,6 +422,34 @@ export default function MiCuentaPage() {
             </div>
           )}
         </div>
+
+        {hasPub && (
+          <div className="vv-cuenta-section">
+            <div className="vv-disp-section" data-testid="section-disponible">
+              <div className="vv-disp-left">
+                <h2 className="vv-cuenta-label" style={{ marginBottom: 2 }}>Disponible ahora</h2>
+                <p className="vv-disp-hint">
+                  {disponibleSwitch
+                    ? "Tu perfil muestra que estas disponible mientras uses la app."
+                    : "Activa para aparecer como disponible en el listado."}
+                </p>
+              </div>
+              <label className="vv-toggle-row" style={{ padding: 0, marginLeft: 12 }}>
+                <input
+                  type="checkbox"
+                  className="vv-toggle-input"
+                  checked={disponibleSwitch}
+                  disabled={togglingDisp}
+                  onChange={(e) => handleToggleDisponible(e.target.checked)}
+                  data-testid="toggle-disponible"
+                />
+                <span className={`vv-toggle ${disponibleSwitch ? "vv-toggle-on" : ""}`} aria-hidden="true">
+                  <span className="vv-toggle-knob" />
+                </span>
+              </label>
+            </div>
+          </div>
+        )}
 
         <div className="vv-cuenta-section">
           <h2 className="vv-cuenta-label">Plan</h2>
