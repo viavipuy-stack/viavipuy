@@ -37,10 +37,9 @@ function RangeSlider({
 
   return (
     <div className="vvf-range-group">
-      <div className="vvf-range-label">{label}</div>
-      <div className="vvf-range-values">
-        <span>{formatValue(valueMin)}</span>
-        <span>{formatValue(valueMax)}</span>
+      <div className="vvf-range-header">
+        <span className="vvf-range-label">{label}</span>
+        <span className="vvf-range-value">{formatValue(valueMin)} — {formatValue(valueMax)}</span>
       </div>
       <div className="vvf-range-track-wrap">
         <div className="vvf-range-track">
@@ -73,37 +72,6 @@ function RangeSlider({
             if (v >= valueMin) onChange(valueMin, v);
           }}
         />
-      </div>
-    </div>
-  );
-}
-
-function ChipSelect({
-  label,
-  options,
-  selected,
-  onToggle,
-}: {
-  label: string;
-  options: string[];
-  selected: string[];
-  onToggle: (val: string) => void;
-}) {
-  return (
-    <div className="vvf-chip-group">
-      <div className="vvf-range-label">{label}</div>
-      <div className="vvf-chips-wrap">
-        {options.map((opt) => (
-          <button
-            key={opt}
-            type="button"
-            className={`vvf-chip ${selected.includes(opt) ? "vvf-chip-active" : ""}`}
-            onClick={() => onToggle(opt)}
-            data-testid={`chip-${opt.toLowerCase().replace(/ /g, "-")}`}
-          >
-            {opt}
-          </button>
-        ))}
       </div>
     </div>
   );
@@ -161,16 +129,6 @@ export default function FiltersModalVIAVIP({ open, onClose, filtros, serviciosOp
     setLocal((prev) => ({ ...prev, ...patch }));
   }, []);
 
-  const toggleArr = useCallback((key: "servicios" | "atiende_en", val: string) => {
-    setLocal((prev) => {
-      const arr = prev[key];
-      return {
-        ...prev,
-        [key]: arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val],
-      };
-    });
-  }, []);
-
   const handleApply = () => {
     const qs = buildSearchParams(local);
     router.push(`${pathname}${qs}`);
@@ -191,15 +149,15 @@ export default function FiltersModalVIAVIP({ open, onClose, filtros, serviciosOp
         <div className="vvf-modal-header">
           <h2 className="vvf-modal-title">Filtros</h2>
           <button className="vvf-modal-close" onClick={onClose} data-testid="button-close-filters">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" width="22" height="22">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" width="18" height="18">
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         <div className="vvf-modal-body" ref={modalBodyRef}>
-          <div className="vvf-section">
-            <div className="vvf-range-label">Ubicacion</div>
+          <div className="vvf-field">
+            <label className="vvf-field-label">Ubicacion</label>
             <select
               className="vvf-select"
               value={local.dep || ""}
@@ -211,31 +169,39 @@ export default function FiltersModalVIAVIP({ open, onClose, filtros, serviciosOp
                 <option key={d} value={d}>{d}</option>
               ))}
             </select>
-            <input
-              className="vvf-input"
-              type="text"
-              placeholder="Zona (ej: Pocitos, Centro...)"
-              value={local.zona || ""}
-              onChange={(e) => update({ zona: e.target.value || undefined })}
-              data-testid="input-zona"
-            />
           </div>
 
-          {serviciosOptions.length > 0 && (
-            <ChipSelect
-              label="Servicios"
-              options={serviciosOptions}
-              selected={local.servicios}
-              onToggle={(v) => toggleArr("servicios", v)}
-            />
-          )}
+          <div className="vvf-field">
+            <label className="vvf-field-label">Servicios</label>
+            <select
+              className="vvf-select"
+              value={local.servicios[0] || ""}
+              onChange={(e) => update({ servicios: e.target.value ? [e.target.value] : [] })}
+              data-testid="select-servicios"
+            >
+              <option value="">Seleccionar servicio</option>
+              {serviciosOptions.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
 
-          <ChipSelect
-            label="Atencion en"
-            options={ATIENDE_EN_OPTIONS}
-            selected={local.atiende_en}
-            onToggle={(v) => toggleArr("atiende_en", v)}
-          />
+          <div className="vvf-field">
+            <label className="vvf-field-label">Atencion en</label>
+            <select
+              className="vvf-select"
+              value={local.atiende_en[0] || ""}
+              onChange={(e) => update({ atiende_en: e.target.value ? [e.target.value] : [] })}
+              data-testid="select-atencion"
+            >
+              <option value="">Lugar de encuentro</option>
+              {ATIENDE_EN_OPTIONS.map((a) => (
+                <option key={a} value={a}>{a}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="vvf-divider" />
 
           <RangeSlider
             label="Edad"

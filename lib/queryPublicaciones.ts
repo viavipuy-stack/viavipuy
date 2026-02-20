@@ -36,9 +36,6 @@ export async function fetchPublicaciones(
     if (filtros.dep) {
       query = query.eq("departamento", filtros.dep);
     }
-    if (filtros.zona) {
-      query = query.ilike("zona", `%${filtros.zona}%`);
-    }
     if (filtros.servicios.length > 0) {
       query = query.contains("servicios", filtros.servicios);
     }

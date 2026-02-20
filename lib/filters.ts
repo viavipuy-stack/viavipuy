@@ -1,6 +1,5 @@
 export interface Filtros {
   dep?: string;
-  zona?: string;
   servicios: string[];
   atiende_en: string[];
   edad_min: number;
@@ -54,7 +53,6 @@ export function parseSearchParams(searchParams: Record<string, string | string[]
 
   return {
     dep: getStr("dep"),
-    zona: getStr("zona"),
     servicios: getArr("serv"),
     atiende_en: getArr("at_en"),
     edad_min: getNum("edad_min", DEFAULTS.edad_min),
@@ -70,7 +68,6 @@ export function buildSearchParams(filtros: Filtros): string {
   const params = new URLSearchParams();
 
   if (filtros.dep) params.set("dep", filtros.dep);
-  if (filtros.zona) params.set("zona", filtros.zona);
   filtros.servicios.forEach((s) => params.append("serv", s));
   filtros.atiende_en.forEach((a) => params.append("at_en", a));
 
@@ -88,7 +85,6 @@ export function buildSearchParams(filtros: Filtros): string {
 export function hasActiveFilters(filtros: Filtros): boolean {
   return !!(
     filtros.dep ||
-    filtros.zona ||
     filtros.servicios.length > 0 ||
     filtros.atiende_en.length > 0 ||
     filtros.edad_min !== DEFAULTS.edad_min ||
