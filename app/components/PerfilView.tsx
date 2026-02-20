@@ -88,16 +88,22 @@ function normalizePhone(phone: string): string {
   return phone.replace(/[\s\-().]/g, "");
 }
 
-function getWhatsAppUrl(phone: string, nombre?: string): string {
+const WA_MSG = "Hola, te contacto desde VIAVIP. ¿Estás disponible?";
+const WA_VIDEO_MSG = "Hola, te contacto desde VIAVIP. Me interesa una videollamada. ¿Estás disponible?";
+const TG_MSG = "Hola, te contacto desde VIAVIP. ¿Estás disponible?";
+
+function getWhatsAppUrl(phone: string): string {
   const digits = phone.replace(/\D/g, "");
-  const msg = encodeURIComponent(
-    "Hola, te vi en VIAVIP. ¿Estás disponible?",
-  );
-  return `https://wa.me/${digits}?text=${msg}`;
+  return `https://wa.me/${digits}?text=${encodeURIComponent(WA_MSG)}`;
 }
 
-function getTelUrl(phone: string): string {
-  return `tel:${normalizePhone(phone)}`;
+function getWhatsAppVideoUrl(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  return `https://wa.me/${digits}?text=${encodeURIComponent(WA_VIDEO_MSG)}`;
+}
+
+function getTelegramUrl(username: string): string {
+  return `https://t.me/${username}?text=${encodeURIComponent(TG_MSG)}`;
 }
 
 function formatPhone(phone: string): string {
@@ -915,7 +921,7 @@ export default function PerfilView({ category }: PerfilViewProps) {
         <div className="vvp-contact-btns">
           {hasWhatsApp ? (
             <a
-              href={getWhatsAppUrl(contactInfo.telefono_whatsapp!, nombre)}
+              href={getWhatsAppUrl(contactInfo.telefono_whatsapp!)}
               target="_blank"
               rel="noopener noreferrer"
               className="vvp-twin-btn vvp-twin-wa"
@@ -948,7 +954,7 @@ export default function PerfilView({ category }: PerfilViewProps) {
           )}
           {hasTelegram ? (
             <a
-              href={`https://t.me/${telegramUser}`}
+              href={getTelegramUrl(telegramUser!)}
               target="_blank"
               rel="noopener noreferrer"
               className="vvp-twin-btn vvp-twin-tg"
@@ -973,7 +979,23 @@ export default function PerfilView({ category }: PerfilViewProps) {
           )}
         </div>
 
-        {contactInfo.video_disponible && (
+        {contactInfo.video_disponible && hasWhatsApp && (
+          <a
+            href={getWhatsAppVideoUrl(contactInfo.telefono_whatsapp!)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="vvp-video-badge vvp-video-badge-link"
+            data-testid="badge-videollamada"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+              <polygon points="23 7 16 12 23 17 23 7" />
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+            </svg>
+            Disponible por videollamada
+          </a>
+        )}
+
+        {contactInfo.video_disponible && !hasWhatsApp && (
           <div className="vvp-video-badge" data-testid="badge-videollamada">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
               <polygon points="23 7 16 12 23 17 23 7" />
@@ -983,16 +1005,16 @@ export default function PerfilView({ category }: PerfilViewProps) {
           </div>
         )}
 
-        {showPhone && (
-          <div className="vvp-phone-row" data-testid="data-telefono">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
-            </svg>
-            <span>Telefono {formatPhone(contactInfo.telefono_whatsapp!)}</span>
-          </div>
-        )}
-
         <div className="vvp-data-rows" data-testid="data-rows">
+          {showPhone && (
+            <div className="vvp-data-row" data-testid="data-telefono">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
+              </svg>
+              <span className="vvp-data-label">Telefono</span>
+              <span className="vvp-data-value">{formatPhone(contactInfo.telefono_whatsapp!)}</span>
+            </div>
+          )}
           {zona && (
             <div className="vvp-data-row" data-testid="data-ubicacion">
               <svg
@@ -1344,7 +1366,7 @@ export default function PerfilView({ category }: PerfilViewProps) {
 
       {hasWhatsApp && (
         <WhatsAppButton
-          href={getWhatsAppUrl(contactInfo.telefono_whatsapp!, nombre)}
+          href={getWhatsAppUrl(contactInfo.telefono_whatsapp!)}
           onClick={() => {
             if (pub.user_id)
               trackProfileEvent(pub.user_id, "whatsapp_click", {

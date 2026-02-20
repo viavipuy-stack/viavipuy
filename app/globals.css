@@ -3905,23 +3905,21 @@ a {
 
 .vvp-video-badge svg { flex-shrink: 0; }
 
-/* -- Phone Row -- */
-.vvp-phone-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 16px;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(214, 177, 90, 0.16);
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 14px;
-  font-weight: 500;
+.vvp-video-badge-link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
 }
 
-.vvp-phone-row svg {
-  color: rgba(198, 167, 94, 0.5);
-  flex-shrink: 0;
+.vvp-video-badge-link:hover {
+  background: rgba(198, 167, 94, 0.18);
+  border-color: rgba(198, 167, 94, 0.4);
 }
+
+.vvp-video-badge-link:active {
+  transform: scale(0.98);
+}
+
 
 /* -- Toggle Switch (mi-cuenta) -- */
 .vv-contact-toggles {
