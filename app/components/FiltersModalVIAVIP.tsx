@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { type Filtros, DEFAULTS, DEPARTAMENTOS, ATIENDE_EN_OPTIONS, buildSearchParams } from "@/lib/filters";
 
@@ -111,6 +111,7 @@ function ChipSelect({
 export default function FiltersModalVIAVIP({ open, onClose, filtros, serviciosOptions }: FiltersModalProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const modalBodyRef = useRef<HTMLDivElement>(null);
 
   const [local, setLocal] = useState<Filtros>({ ...filtros });
 
@@ -121,6 +122,9 @@ export default function FiltersModalVIAVIP({ open, onClose, filtros, serviciosOp
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
+      setTimeout(() => {
+        modalBodyRef.current?.scrollTo({ top: 0, behavior: "auto" });
+      }, 0);
     } else {
       document.body.style.overflow = "";
     }
@@ -169,7 +173,7 @@ export default function FiltersModalVIAVIP({ open, onClose, filtros, serviciosOp
           </button>
         </div>
 
-        <div className="vvf-modal-body">
+        <div className="vvf-modal-body" ref={modalBodyRef}>
           <div className="vvf-section">
             <div className="vvf-range-label">Ubicacion</div>
             <select
