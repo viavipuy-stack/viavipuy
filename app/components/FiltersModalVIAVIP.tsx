@@ -158,9 +158,8 @@ export default function FiltersModalVIAVIP({ open, onClose, filtros, serviciosOp
   if (!open) return null;
 
   return (
-    <>
-      <div className="vvf-overlay" onClick={onClose} />
-      <div className="vvf-modal" data-testid="filters-modal">
+    <div className="vvf-overlay" onClick={onClose}>
+      <div className="vvf-modal" onClick={(e) => e.stopPropagation()} data-testid="filters-modal">
         <div className="vvf-modal-header">
           <h2 className="vvf-modal-title">Filtros</h2>
           <button className="vvf-modal-close" onClick={onClose} data-testid="button-close-filters">
@@ -217,7 +216,7 @@ export default function FiltersModalVIAVIP({ open, onClose, filtros, serviciosOp
             valueMin={local.edad_min}
             valueMax={local.edad_max}
             onChange={(mn, mx) => update({ edad_min: mn, edad_max: mx })}
-            formatValue={(v) => `${v} anos`}
+            formatValue={(v) => `${v} años`}
           />
 
           <RangeSlider
@@ -251,6 +250,6 @@ export default function FiltersModalVIAVIP({ open, onClose, filtros, serviciosOp
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
