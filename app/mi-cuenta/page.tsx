@@ -6,6 +6,7 @@ import { getSupabase } from "@/lib/supabaseClient";
 import { getPlanConfig } from "@/lib/plans";
 import { fixStorageUrl } from "@/lib/fixStorageUrl";
 import MediaGallery from "@/app/components/MediaGallery";
+import FotosPreviewEditor from "@/app/components/FotosPreviewEditor";
 
 interface ProfileData {
   verification_status?: string;
@@ -33,6 +34,7 @@ interface PubData {
   rating?: number;
   telefono?: string;
   fotos?: string[];
+  fotos_preview?: string[];
   videos?: string[];
   servicios?: string[];
   fantasias?: string[];
@@ -104,6 +106,7 @@ export default function MiCuentaPage() {
 
   const [pub, setPub] = useState<PubData | null>(null);
   const [fotos, setFotos] = useState<string[]>([]);
+  const [fotosPreview, setFotosPreview] = useState<string[]>([]);
   const [videos, setVideos] = useState<string[]>([]);
   const [coverUrl, setCoverUrl] = useState("");
   const [tags, setTags] = useState<Record<string, string[]>>({
@@ -169,7 +172,7 @@ export default function MiCuentaPage() {
 
       const { data: pubData } = await supabase
         .from("publicaciones")
-        .select("id, nombre, edad, descripcion, cover_url, zona, ciudad, disponible, rating, telefono, fotos, videos, servicios, fantasias, servicios_virtuales, tipos_masajes, idiomas")
+        .select("id, nombre, edad, descripcion, cover_url, zona, ciudad, disponible, rating, telefono, fotos, fotos_preview, videos, servicios, fantasias, servicios_virtuales, tipos_masajes, idiomas")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -177,6 +180,7 @@ export default function MiCuentaPage() {
         const p = pubData as PubData;
         setPub(p);
         setFotos(Array.isArray(p.fotos) ? p.fotos : []);
+        setFotosPreview(Array.isArray(p.fotos_preview) ? p.fotos_preview : []);
         setVideos(Array.isArray(p.videos) ? p.videos : []);
         setCoverUrl(p.cover_url || "");
         setTags({
@@ -309,6 +313,18 @@ export default function MiCuentaPage() {
       setContactMsg({ type: "success", text: "Contacto guardado." });
     }
     setSavingContact(false);
+  }
+
+  async function handleSavePreview(newPreview: string[]) {
+    if (!pub || !userId) return;
+    const supabase = getSupabase();
+    if (!supabase) throw new Error("Supabase no inicializado.");
+    const { error } = await supabase
+      .from("publicaciones")
+      .update({ fotos_preview: newPreview })
+      .eq("id", pub.id)
+      .eq("user_id", userId);
+    if (error) throw new Error(error.message);
   }
 
   async function handleLogout() {
@@ -518,6 +534,17 @@ export default function MiCuentaPage() {
             >
               {saving ? "Guardando..." : "Guardar cambios"}
             </button>
+          </div>
+        )}
+
+        {hasPub && userId && verificado && fotos.length > 0 && (
+          <div className="vv-cuenta-section">
+            <FotosPreviewEditor
+              fotosPreview={fotosPreview}
+              fotosGallery={fotos}
+              onChange={setFotosPreview}
+              onSave={handleSavePreview}
+            />
           </div>
         )}
 

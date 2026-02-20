@@ -16,6 +16,7 @@ interface Publicacion {
   ciudad?: string;
   cover_url?: string;
   fotos?: string[];
+  fotos_preview?: string[];
   disponible?: boolean;
   rating?: number;
   plan_actual?: string;
@@ -64,10 +65,12 @@ export default function ListadoGrid({ items, basePath }: ListadoGridProps) {
   } | null>(null);
 
   const openPreview = useCallback((item: Publicacion) => {
-    const fotos = item.fotos || [];
-    if (fotos.length === 0) return false;
+    const preview = item.fotos_preview && item.fotos_preview.length > 0
+      ? item.fotos_preview
+      : (item.fotos || []).slice(0, 5);
+    if (preview.length === 0) return false;
     setPreviewData({
-      fotos,
+      fotos: preview,
       nombre: item.nombre || "Sin nombre",
       profileUrl: `${basePath}/${item.id}`,
     });
@@ -78,8 +81,10 @@ export default function ListadoGrid({ items, basePath }: ListadoGridProps) {
 
   const handleCardClick = useCallback((e: React.MouseEvent, item: Publicacion) => {
     if (!isMobile) return;
-    const fotos = item.fotos || [];
-    if (fotos.length === 0) {
+    const preview = item.fotos_preview && item.fotos_preview.length > 0
+      ? item.fotos_preview
+      : (item.fotos || []).slice(0, 5);
+    if (preview.length === 0) {
       router.push(`${basePath}/${item.id}`);
       return;
     }
@@ -90,8 +95,10 @@ export default function ListadoGrid({ items, basePath }: ListadoGridProps) {
 
   const handleDesktopCardClick = useCallback((e: React.MouseEvent, item: Publicacion) => {
     if (isMobile) return;
-    const fotos = item.fotos || [];
-    if (fotos.length > 0) {
+    const preview = item.fotos_preview && item.fotos_preview.length > 0
+      ? item.fotos_preview
+      : (item.fotos || []).slice(0, 5);
+    if (preview.length > 0) {
       e.preventDefault();
       e.stopPropagation();
       openPreview(item);
