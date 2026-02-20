@@ -62,8 +62,19 @@ The application is built with Next.js 16 using the App Router and TypeScript. St
 - `app/components/ListadoGrid.tsx` - Listing grid with mini-preview integration (mobile tap/desktop click)
 - `lib/plans.ts` - Plan configuration (limits, features, badges, pricing)
 - `lib/trackEvent.ts` - Debounced event tracking utility
+- `lib/disponibilidad.ts` - Pure SSR-safe functions: isDisponibleAhora (45min window), getActivityLabel (relative time strings)
+- `lib/pingActividad.ts` - Client-side: pingActividad (heartbeat update), updateDisponible (toggle switch)
+- `hooks/useHeartbeat.ts` - Heartbeat hook: 60s interval + visibility change + user interaction (throttled 30s)
+- `app/components/FotosPreviewEditor.tsx` - 5-slot photo preview editor with modal picker and reorder
 
 ## Recent Changes
+- Added real-time availability system: "Disponible ahora" toggle in mi-cuenta, heartbeat pings only when switch=true, 45-minute activity window
+- Pure availability functions extracted to lib/disponibilidad.ts (SSR-safe), client DB helpers in lib/pingActividad.ts
+- Heartbeat gated by disponible switch: stops pinging when user turns off availability
+- Activity labels shown only when disponible=true: "Activa ahora", "Activa hace X min", "Ultima conexion hace Xh/Xd"
+- Added FotosPreviewEditor: 5-slot preview photo management with modal picker from gallery, reorder arrows, auto-save
+- Integrated fotos_preview in ListadoGrid and MiniPreview with fallback to first 5 gallery photos
+- Enhanced multi-photo upload: batch limit 10, total limit 30, progress feedback
 - Added photo watermark system: "VIAVIP" text overlay (48% width, 0.15 opacity, serif) applied server-side via sharp in /api/upload-media. Videos unaffected. Auth-protected API route with service role key for Supabase Storage uploads.
 - Added legal pages: /terminos-y-condiciones, /politica-de-privacidad, /reportar-contenido (black bg, gold titles, full legal text)
 - Added LegalFooter component to all profile pages (Terminos/Privacidad/Reportar links, VIAVIP brand, RTA/SafeLabeling badges)
