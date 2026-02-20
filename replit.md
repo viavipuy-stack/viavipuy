@@ -58,6 +58,8 @@ The application is built with Next.js 16 using the App Router and TypeScript. St
 - `app/components/StoryViewer.tsx` - Fullscreen story viewer with progress bar
 - `app/components/DestacadasDiamante.tsx` - Destacadas carousel for /mujeres
 - `app/components/PerfilView.tsx` - Profile page with gallery, tracking, favorites
+- `app/components/MiniPreview.tsx` - Mini gallery preview (portal, swipe, dots, Ver perfil CTA)
+- `app/components/ListadoGrid.tsx` - Listing grid with mini-preview integration (mobile tap/desktop click)
 - `lib/plans.ts` - Plan configuration (limits, features, badges, pricing)
 - `lib/trackEvent.ts` - Debounced event tracking utility
 
@@ -80,6 +82,9 @@ The application is built with Next.js 16 using the App Router and TypeScript. St
 - Fixed sexo_oral array normalization in /publicar
 - Added plan ranking sort to /hombres page (was missing)
 - All listing pages (/mujeres, /hombres, /trans) now sort by plan tier priority
+- Added MiniPreview feature: mobile tap card → gallery preview (up to 5 photos, swipe, dots, "Ver perfil" CTA); desktop click → preview; overlay close; scroll lock; portal rendering
+- Premium video badge: gold gradient, glow, pulse animation for "Disponible por videollamada"
+- Contact messages branded: WhatsApp/Telegram prefill "Hola, te contacto desde VIAVIP"
 
 ## Known Issue: Legacy Data
 - Existing publicaciones rows may have incorrect categoria (defaulted to 'mujer'). Run this SQL in Supabase to fix:

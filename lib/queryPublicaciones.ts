@@ -9,6 +9,7 @@ export interface PublicacionItem {
   departamento?: string;
   zona?: string;
   cover_url?: string;
+  fotos?: string[];
   rating?: number;
   disponible?: boolean;
   tarifa_hora?: number;
@@ -29,7 +30,7 @@ export async function fetchPublicaciones(
   try {
     let query = supabase
       .from("publicaciones")
-      .select("id,nombre,edad,departamento,zona,cover_url,rating,disponible,tarifa_hora,altura_cm,servicios,atiende_en,user_id")
+      .select("id,nombre,edad,departamento,zona,cover_url,fotos,rating,disponible,tarifa_hora,altura_cm,servicios,atiende_en,user_id")
       .eq("estado", "activa")
       .eq("categoria", categoria);
 

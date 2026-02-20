@@ -26,7 +26,10 @@ export default function ListadoFiltered({
 }: ListadoFilteredProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
-  const gridItems = items.map(({ user_id, ...rest }) => rest);
+  const gridItems = items.map(({ user_id, ...rest }) => ({
+    ...rest,
+    fotos: rest.fotos || [],
+  }));
 
   return (
     <>
