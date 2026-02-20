@@ -11,8 +11,9 @@ export default function WhatsAppButton({ href, onClick }: WhatsAppButtonProps) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const upperBtn = document.querySelector('[data-testid="button-whatsapp"]');
-    if (!upperBtn) {
+    const contactSection = document.querySelector('.vvp-contact-btns') ||
+                           document.querySelector('[data-testid="button-whatsapp"]');
+    if (!contactSection) {
       setVisible(true);
       return;
     }
@@ -21,10 +22,10 @@ export default function WhatsAppButton({ href, onClick }: WhatsAppButtonProps) {
       ([entry]) => {
         setVisible(!entry.isIntersecting);
       },
-      { threshold: 0 }
+      { threshold: 0.1 }
     );
 
-    observer.observe(upperBtn);
+    observer.observe(contactSection);
     return () => observer.disconnect();
   }, []);
 
