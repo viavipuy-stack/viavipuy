@@ -597,19 +597,31 @@ export default function MiCuentaPage() {
             </div>
           </div>
           <div className="vv-contact-toggles">
-            <label className="vv-toggle-row" htmlFor="toggle-telefono-visible">
+            <label className="vv-toggle-row" data-testid="row-telefono-visible">
               <span className="vv-toggle-text">Mostrar mi telefono publicamente</span>
-              <div className={`vv-toggle ${telefonoVisible ? "vv-toggle-on" : ""}`} onClick={() => setTelefonoVisible(!telefonoVisible)}>
-                <div className="vv-toggle-knob" />
-              </div>
-              <input type="checkbox" id="toggle-telefono-visible" checked={telefonoVisible} onChange={(e) => setTelefonoVisible(e.target.checked)} style={{ display: "none" }} data-testid="toggle-telefono-visible" />
+              <input
+                type="checkbox"
+                className="vv-toggle-input"
+                checked={telefonoVisible}
+                onChange={(e) => setTelefonoVisible(e.target.checked)}
+                data-testid="toggle-telefono-visible"
+              />
+              <span className={`vv-toggle ${telefonoVisible ? "vv-toggle-on" : ""}`} aria-hidden="true">
+                <span className="vv-toggle-knob" />
+              </span>
             </label>
-            <label className="vv-toggle-row" htmlFor="toggle-video-disponible">
+            <label className="vv-toggle-row" data-testid="row-video-disponible">
               <span className="vv-toggle-text">Disponible por videollamada</span>
-              <div className={`vv-toggle ${videoDisponible ? "vv-toggle-on" : ""}`} onClick={() => setVideoDisponible(!videoDisponible)}>
-                <div className="vv-toggle-knob" />
-              </div>
-              <input type="checkbox" id="toggle-video-disponible" checked={videoDisponible} onChange={(e) => setVideoDisponible(e.target.checked)} style={{ display: "none" }} data-testid="toggle-video-disponible" />
+              <input
+                type="checkbox"
+                className="vv-toggle-input"
+                checked={videoDisponible}
+                onChange={(e) => setVideoDisponible(e.target.checked)}
+                data-testid="toggle-video-disponible"
+              />
+              <span className={`vv-toggle ${videoDisponible ? "vv-toggle-on" : ""}`} aria-hidden="true">
+                <span className="vv-toggle-knob" />
+              </span>
             </label>
           </div>
           <button
