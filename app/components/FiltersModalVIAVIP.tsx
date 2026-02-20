@@ -118,6 +118,17 @@ export default function FiltersModalVIAVIP({ open, onClose, filtros, serviciosOp
     if (open) setLocal({ ...filtros });
   }, [open, filtros]);
 
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   const update = useCallback((patch: Partial<Filtros>) => {
     setLocal((prev) => ({ ...prev, ...patch }));
   }, []);

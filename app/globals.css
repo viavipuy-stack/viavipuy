@@ -5579,6 +5579,10 @@ a {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   z-index: 500;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: 0;
   animation: vvf-fadeIn 0.2s ease;
 }
 
@@ -5589,17 +5593,19 @@ a {
 
 .vvf-modal {
   position: fixed;
-  bottom: 0;
+  top: 0;
   left: 0;
   right: 0;
-  max-height: 88vh;
-  max-height: 88dvh;
+  bottom: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
   z-index: 501;
   background: #111111;
-  border-top: 1px solid rgba(198, 167, 94, 0.25);
-  border-radius: 20px 20px 0 0;
+  border-radius: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   animation: vvf-slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(198, 167, 94, 0.08);
 }
@@ -5611,24 +5617,33 @@ a {
 
 @media (min-width: 640px) {
   .vvf-modal {
-    max-width: 480px;
+    max-width: 720px;
+    height: min(90dvh, 900px);
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    bottom: 0;
+    right: auto;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    border-radius: 18px;
+    border: 1px solid rgba(198, 167, 94, 0.25);
   }
   @keyframes vvf-slideUp {
-    from { transform: translateX(-50%) translateY(100%); }
-    to { transform: translateX(-50%) translateY(0); }
+    from { transform: translate(-50%, -50%) scale(0.95); opacity: 0; }
+    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
   }
 }
 
 .vvf-modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 18px 20px 14px;
   border-bottom: 1px solid rgba(198, 167, 94, 0.12);
   flex-shrink: 0;
+  background: #111111;
 }
 
 .vvf-modal-title {
@@ -5659,6 +5674,7 @@ a {
 .vvf-modal-body {
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 16px 20px;
   display: flex;
   flex-direction: column;
@@ -5854,12 +5870,16 @@ a {
 
 /* Modal footer */
 .vvf-modal-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   display: flex;
   gap: 12px;
   padding: 16px 20px;
   padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid rgba(198, 167, 94, 0.12);
   flex-shrink: 0;
+  background: #111111;
 }
 
 .vvf-btn-clear {
