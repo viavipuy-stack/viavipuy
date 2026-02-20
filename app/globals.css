@@ -5166,38 +5166,45 @@ a {
   display: flex;
   justify-content: center;
   padding: 0 16px;
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
   pointer-events: none;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+
+.vvp-sticky-wa-show {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .vvp-sticky-wa-btn {
-  max-width: 448px;
+  max-width: 400px;
   width: 100%;
-  height: 52px;
+  height: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 0 26px;
+  gap: 8px;
+  padding: 0 22px;
   position: relative;
-  background: linear-gradient(180deg, #36d874 0%, #28bf5c 30%, #20a84c 65%, #189440 100%);
+  background: linear-gradient(180deg, #30d06c 0%, #25b854 30%, #1da044 65%, #18903c 100%);
   color: #fff;
-  font-size: 15.5px;
+  font-size: 14.5px;
   font-weight: 700;
   font-family: inherit;
   letter-spacing: 0.3px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-bottom-color: rgba(0, 0, 0, 0.12);
-  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom-color: rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
   cursor: pointer;
   pointer-events: auto;
   text-decoration: none;
   box-shadow:
-    0 26px 60px rgba(0, 0, 0, 0.88),
-    0 10px 26px rgba(0, 0, 0, 0.62),
-    0 2px 6px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: all 220ms ease;
+    0 8px 24px rgba(0, 0, 0, 0.55),
+    0 3px 8px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: all 200ms ease;
 }
 
 .vvp-sticky-wa-btn::before {
@@ -5207,32 +5214,31 @@ a {
   left: 0;
   right: 0;
   height: 50%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 100%);
-  border-radius: 14px 14px 0 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  border-radius: 12px 12px 0 0;
   pointer-events: none;
 }
 
 .vvp-sticky-wa-btn:hover {
   filter: brightness(1.04);
   box-shadow:
-    0 30px 68px rgba(0, 0, 0, 0.9),
-    0 14px 30px rgba(0, 0, 0, 0.65),
-    0 3px 8px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 10px 28px rgba(0, 0, 0, 0.6),
+    0 4px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .vvp-sticky-wa-btn:active {
   transform: translateY(1px);
   filter: brightness(0.94);
   box-shadow:
-    0 12px 28px rgba(0, 0, 0, 0.7),
-    0 6px 14px rgba(0, 0, 0, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    0 2px 6px rgba(0, 0, 0, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .vvp-sticky-wa-btn svg {
-  width: 21px;
-  height: 21px;
+  width: 19px;
+  height: 19px;
   flex-shrink: 0;
   position: relative;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.18));
@@ -5240,7 +5246,7 @@ a {
 
 .vvp-sticky-wa-btn span {
   position: relative;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 /* -- Scroll to Top -- */

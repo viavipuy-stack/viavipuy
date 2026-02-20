@@ -1,13 +1,38 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 interface WhatsAppButtonProps {
   href: string;
   onClick?: () => void;
 }
 
 export default function WhatsAppButton({ href, onClick }: WhatsAppButtonProps) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const upperBtn = document.querySelector('[data-testid="button-whatsapp"]');
+    if (!upperBtn) {
+      setVisible(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setVisible(!entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(upperBtn);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="vvp-sticky-wa" data-testid="sticky-whatsapp">
+    <div
+      className={`vvp-sticky-wa${visible ? " vvp-sticky-wa-show" : ""}`}
+      data-testid="sticky-whatsapp"
+    >
       <a
         href={href}
         target="_blank"
