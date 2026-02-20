@@ -3889,35 +3889,77 @@ a {
 
 /* -- Video Badge -- */
 .vvp-video-badge {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   margin: 0 16px 10px;
-  padding: 10px 16px;
-  border-radius: 10px;
-  background: rgba(198, 167, 94, 0.12);
-  border: 1px solid rgba(198, 167, 94, 0.25);
-  color: var(--gold);
+  padding: 12px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  background: linear-gradient(
+    135deg,
+    rgba(35, 28, 10, 0.95) 0%,
+    rgba(120, 90, 20, 0.95) 50%,
+    rgba(35, 28, 10, 0.95) 100%
+  );
+  box-shadow:
+    0 0 18px rgba(212, 175, 55, 0.35),
+    inset 0 0 12px rgba(212, 175, 55, 0.15);
+  color: #f5dfa0;
   font-size: 13.5px;
   font-weight: 600;
+  letter-spacing: 0.3px;
+  overflow: hidden;
+  transition: all 0.25s ease;
 }
 
-.vvp-video-badge svg { flex-shrink: 0; }
+.vvp-video-badge::after {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 215, 120, 0.25) 0%,
+    transparent 60%
+  );
+  opacity: 0.6;
+  animation: vipVideoPulse 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes vipVideoPulse {
+  0%, 100% { transform: scale(0.9); opacity: 0.45; }
+  50% { transform: scale(1.15); opacity: 0.9; }
+}
+
+.vvp-video-badge svg {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 0 3px rgba(212, 175, 55, 0.5));
+}
+
+.vvp-video-badge span {
+  position: relative;
+  z-index: 1;
+}
 
 .vvp-video-badge-link {
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
 }
 
 .vvp-video-badge-link:hover {
-  background: rgba(198, 167, 94, 0.18);
-  border-color: rgba(198, 167, 94, 0.4);
+  box-shadow:
+    0 0 26px rgba(212, 175, 55, 0.55),
+    inset 0 0 16px rgba(212, 175, 55, 0.25);
+  transform: translateY(-1px);
 }
 
 .vvp-video-badge-link:active {
-  transform: scale(0.98);
+  transform: scale(0.97) translateY(0);
 }
 
 
