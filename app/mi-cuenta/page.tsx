@@ -121,6 +121,12 @@ export default function MiCuentaPage() {
   const [twitterUrl, setTwitterUrl] = useState("");
   const [savingSocial, setSavingSocial] = useState(false);
   const [socialMsg, setSocialMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [telefonoWhatsapp, setTelefonoWhatsapp] = useState("");
+  const [telegramUsername, setTelegramUsername] = useState("");
+  const [telefonoVisible, setTelefonoVisible] = useState(false);
+  const [videoDisponible, setVideoDisponible] = useState(false);
+  const [savingContact, setSavingContact] = useState(false);
+  const [contactMsg, setContactMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -133,7 +139,7 @@ export default function MiCuentaPage() {
       setUserEmail(user.email || "");
       const { data: profRows, error: profErr } = await supabase
         .from("profiles")
-        .select("verification_status, plan_actual, plan_estado, paid_until, trial_ends_at, verified_at, categoria, nombre, doc_frente_url, doc_dorso_url, selfie_url, instagram_url, onlyfans_url, twitter_url, email_confirmed")
+        .select("verification_status, plan_actual, plan_estado, paid_until, trial_ends_at, verified_at, categoria, nombre, doc_frente_url, doc_dorso_url, selfie_url, instagram_url, onlyfans_url, twitter_url, email_confirmed, telefono_whatsapp, telegram_username, telefono_visible, video_disponible")
         .eq("id", user.id)
         .order("created_at", { ascending: false })
         .limit(1);
@@ -151,9 +157,14 @@ export default function MiCuentaPage() {
       setEmailConfirmed(emailConfirmedByAuth || emailConfirmedByProfile);
 
       if (prof) {
-        setInstagramUrl((prof as Record<string, unknown>).instagram_url as string || "");
-        setOnlyfansUrl((prof as Record<string, unknown>).onlyfans_url as string || "");
-        setTwitterUrl((prof as Record<string, unknown>).twitter_url as string || "");
+        const p = prof as Record<string, unknown>;
+        setInstagramUrl(p.instagram_url as string || "");
+        setOnlyfansUrl(p.onlyfans_url as string || "");
+        setTwitterUrl(p.twitter_url as string || "");
+        setTelefonoWhatsapp(p.telefono_whatsapp as string || "");
+        setTelegramUsername(p.telegram_username as string || "");
+        setTelefonoVisible(!!p.telefono_visible);
+        setVideoDisponible(!!p.video_disponible);
       }
 
       const { data: pubData } = await supabase
@@ -270,6 +281,34 @@ export default function MiCuentaPage() {
       setTwitterUrl(payload.twitter_url || "");
     }
     setSavingSocial(false);
+  }
+
+  async function handleSaveContact() {
+    if (!userId) return;
+    setSavingContact(true);
+    setContactMsg(null);
+    const supabase = getSupabase();
+    if (!supabase) { setSavingContact(false); return; }
+
+    const cleanTelegram = telegramUsername.trim().replace(/^@/, "");
+    const payload = {
+      telefono_whatsapp: telefonoWhatsapp.trim() || null,
+      telegram_username: cleanTelegram || null,
+      telefono_visible: telefonoVisible,
+      video_disponible: videoDisponible,
+    };
+
+    const { error } = await supabase
+      .from("profiles")
+      .update(payload)
+      .eq("id", userId);
+
+    if (error) {
+      setContactMsg({ type: "error", text: `Error: ${error.message}` });
+    } else {
+      setContactMsg({ type: "success", text: "Contacto guardado." });
+    }
+    setSavingContact(false);
   }
 
   async function handleLogout() {
@@ -511,6 +550,78 @@ export default function MiCuentaPage() {
               </a>
             )}
           </div>
+        </div>
+
+        <div className="vv-cuenta-section">
+          <h2 className="vv-cuenta-label">Contacto</h2>
+          {contactMsg && (
+            <div className={contactMsg.type === "error" ? "vv-form-error-box" : "vv-form-success-box"} style={{ fontSize: "13px", marginBottom: 10 }}>
+              {contactMsg.text}
+            </div>
+          )}
+          <div className="vv-contact-fields">
+            <div className="vv-social-input-row">
+              <label className="vv-social-input-label" htmlFor="input-whatsapp">
+                <svg viewBox="0 0 24 24" fill="#25d366" width="18" height="18">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                  <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.96 7.96 0 01-4.11-1.14l-.29-.17-2.87.85.85-2.87-.18-.29A7.96 7.96 0 014 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8z" />
+                </svg>
+                WhatsApp
+              </label>
+              <input
+                id="input-whatsapp"
+                type="tel"
+                className="vv-social-input"
+                placeholder="Ej: 59894582582"
+                value={telefonoWhatsapp}
+                onChange={(e) => setTelefonoWhatsapp(e.target.value)}
+                data-testid="input-whatsapp"
+              />
+            </div>
+            <div className="vv-social-input-row">
+              <label className="vv-social-input-label" htmlFor="input-telegram">
+                <svg viewBox="0 0 24 24" fill="#2AABEE" width="18" height="18">
+                  <path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                </svg>
+                Telegram
+              </label>
+              <input
+                id="input-telegram"
+                type="text"
+                className="vv-social-input"
+                placeholder="tu_usuario (sin @)"
+                value={telegramUsername}
+                onChange={(e) => setTelegramUsername(e.target.value)}
+                data-testid="input-telegram"
+              />
+            </div>
+          </div>
+          <div className="vv-contact-toggles">
+            <label className="vv-toggle-row" htmlFor="toggle-telefono-visible">
+              <span className="vv-toggle-text">Mostrar mi telefono publicamente</span>
+              <div className={`vv-toggle ${telefonoVisible ? "vv-toggle-on" : ""}`} onClick={() => setTelefonoVisible(!telefonoVisible)}>
+                <div className="vv-toggle-knob" />
+              </div>
+              <input type="checkbox" id="toggle-telefono-visible" checked={telefonoVisible} onChange={(e) => setTelefonoVisible(e.target.checked)} style={{ display: "none" }} data-testid="toggle-telefono-visible" />
+            </label>
+            <label className="vv-toggle-row" htmlFor="toggle-video-disponible">
+              <span className="vv-toggle-text">Disponible por videollamada</span>
+              <div className={`vv-toggle ${videoDisponible ? "vv-toggle-on" : ""}`} onClick={() => setVideoDisponible(!videoDisponible)}>
+                <div className="vv-toggle-knob" />
+              </div>
+              <input type="checkbox" id="toggle-video-disponible" checked={videoDisponible} onChange={(e) => setVideoDisponible(e.target.checked)} style={{ display: "none" }} data-testid="toggle-video-disponible" />
+            </label>
+          </div>
+          <button
+            type="button"
+            className="vv-btn"
+            style={{ width: "100%", marginTop: 14 }}
+            disabled={savingContact}
+            onClick={handleSaveContact}
+            data-testid="button-save-contact"
+          >
+            {savingContact ? "Guardando..." : "Guardar contacto"}
+          </button>
         </div>
 
         <div className="vv-cuenta-section">

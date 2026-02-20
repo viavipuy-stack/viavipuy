@@ -3834,6 +3834,157 @@ a {
   pointer-events: none;
 }
 
+/* -- Contact Twin Buttons (WhatsApp + Telegram) -- */
+.vvp-contact-btns {
+  display: flex;
+  gap: 10px;
+  padding: 0 16px 10px;
+  background: #0a0a0a;
+}
+
+.vvp-twin-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 12px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: transform 0.15s, filter 0.15s;
+  line-height: 1.2;
+}
+
+.vvp-twin-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+.vvp-twin-btn:active {
+  transform: scale(0.97);
+  filter: brightness(0.85);
+}
+
+.vvp-twin-wa {
+  background: linear-gradient(180deg, #36d874 0%, #28bf5c 45%, #20a84c 75%, #189440 100%);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.vvp-twin-tg {
+  background: linear-gradient(180deg, #34AADF 0%, #2A9BCF 50%, #2088B8 100%);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.vvp-twin-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* -- Video Badge -- */
+.vvp-video-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 16px 10px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: rgba(198, 167, 94, 0.12);
+  border: 1px solid rgba(198, 167, 94, 0.25);
+  color: var(--gold);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.vvp-video-badge svg { flex-shrink: 0; }
+
+/* -- Phone Row -- */
+.vvp-phone-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(214, 177, 90, 0.16);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.vvp-phone-row svg {
+  color: rgba(198, 167, 94, 0.5);
+  flex-shrink: 0;
+}
+
+/* -- Toggle Switch (mi-cuenta) -- */
+.vv-contact-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 14px;
+}
+
+.vv-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+}
+
+.vv-toggle-row:last-child { border-bottom: none; }
+
+.vv-toggle-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.vv-toggle {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: #333;
+  position: relative;
+  transition: background 0.25s;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.vv-toggle-on {
+  background: var(--gold);
+}
+
+.vv-toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.25s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.vv-toggle-on .vv-toggle-knob {
+  transform: translateX(20px);
+}
+
+.vv-contact-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 /* -- Data Rows (Limbo-style, before tabs) -- */
 .vvp-data-rows {
   background: #0a0a0a;
