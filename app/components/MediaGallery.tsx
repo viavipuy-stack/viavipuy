@@ -4,6 +4,13 @@ import { useState, useRef } from "react";
 import { getSupabase } from "@/lib/supabaseClient";
 import { fixStorageUrl } from "@/lib/fixStorageUrl";
 
+const MAX_UPLOAD_BATCH = 10;
+const MAX_PHOTOS_TOTAL = 30;
+
+function getUploadLimits(_plan?: string) {
+  return { maxBatch: MAX_UPLOAD_BATCH, maxTotal: MAX_PHOTOS_TOTAL };
+}
+
 interface MediaGalleryProps {
   userId: string;
   fotos: string[];
@@ -30,14 +37,18 @@ export default function MediaGallery({
   coverUrl,
 }: MediaGalleryProps) {
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState("");
   const [uploadMsg, setUploadMsg] = useState<string | null>(null);
   const [uploadErr, setUploadErr] = useState<string | null>(null);
   const fotoRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
 
+  const limits = getUploadLimits(planName);
   const fotosCount = fotos.length;
   const videosCount = videos.length;
-  const canAddFoto = maxFotos === null || fotosCount < maxFotos;
+
+  const planFotoLimit = maxFotos === null ? limits.maxTotal : Math.min(maxFotos, limits.maxTotal);
+  const canAddFoto = fotosCount < planFotoLimit;
   const canAddVideo = maxVideos > 0 && videosCount < maxVideos;
 
   const fotosLabel =
@@ -48,8 +59,133 @@ export default function MediaGallery({
       ? `${videosCount} (Ilimitados)`
       : `${videosCount}/${maxVideos}`;
 
-  async function uploadFile(file: File, type: "foto" | "video") {
-    // Reset mensajes
+  async function uploadSinglePhoto(file: File, accessToken: string): Promise<string | null> {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("userId", userId);
+    formData.append("type", "foto");
+
+    const res = await fetch("/api/upload-media", {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const contentType = res.headers.get("content-type") || "";
+    const payload = contentType.includes("application/json")
+      ? await res.json()
+      : { error: await res.text() };
+
+    if (!res.ok) {
+      throw new Error(payload?.error || "Error desconocido");
+    }
+
+    return payload.url;
+  }
+
+  async function handleMultiUpload(files: FileList) {
+    setUploadMsg(null);
+    setUploadErr(null);
+    setUploadProgress("");
+
+    const fileArr = Array.from(files);
+
+    if (fileArr.length > limits.maxBatch) {
+      setUploadErr(`Maximo ${limits.maxBatch} fotos por vez.`);
+      return;
+    }
+
+    const remaining = planFotoLimit - fotosCount;
+    if (remaining <= 0) {
+      setUploadErr(`Limite de fotos alcanzado (Plan ${planName}).`);
+      return;
+    }
+
+    const toUpload = fileArr.slice(0, remaining);
+    const skipped = fileArr.length - toUpload.length;
+
+    for (const f of toUpload) {
+      if (f.size > 25 * 1024 * 1024) {
+        setUploadErr("Cada foto no puede superar 25MB.");
+        return;
+      }
+      if (!f.type.startsWith("image/")) {
+        setUploadErr("Solo se permiten imagenes.");
+        return;
+      }
+    }
+
+    if (skipped > 0) {
+      setUploadMsg(`Se subiran ${toUpload.length} fotos. Limite total: ${planFotoLimit}.`);
+    }
+
+    setUploading(true);
+
+    try {
+      const supabase = getSupabase();
+      if (!supabase) {
+        setUploadErr("Supabase no inicializado.");
+        setUploading(false);
+        return;
+      }
+
+      const { data: sessionData, error: sessionErr } =
+        await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token || "";
+
+      if (sessionErr || !accessToken) {
+        setUploadErr("Sesion no valida. Cerra sesion y volve a entrar.");
+        setUploading(false);
+        return;
+      }
+
+      const newUrls: string[] = [];
+      let errorCount = 0;
+
+      for (let i = 0; i < toUpload.length; i++) {
+        setUploadProgress(`Subiendo ${i + 1}/${toUpload.length}...`);
+        try {
+          const url = await uploadSinglePhoto(toUpload[i], accessToken);
+          if (url) newUrls.push(url);
+        } catch {
+          errorCount++;
+        }
+      }
+
+      if (newUrls.length > 0) {
+        const updatedFotos = [...fotos, ...newUrls];
+        onFotosChange(updatedFotos);
+
+        if (!coverUrl && updatedFotos.length > 0) {
+          onCoverChange(updatedFotos[0]);
+        }
+      }
+
+      setUploadProgress("");
+
+      if (errorCount > 0 && newUrls.length > 0) {
+        setUploadMsg(`${newUrls.length} fotos subidas. ${errorCount} fallaron.`);
+      } else if (errorCount > 0) {
+        setUploadErr(`Error al subir las fotos.`);
+      } else {
+        setUploadMsg(
+          newUrls.length === 1
+            ? "Foto subida correctamente."
+            : `${newUrls.length} fotos subidas correctamente.`
+        );
+      }
+    } catch (err: any) {
+      setUploadErr("Error al subir: " + (err?.message || "Error desconocido"));
+      setUploadProgress("");
+    }
+
+    setUploading(false);
+  }
+
+  async function uploadVideo(file: File) {
     setUploadMsg(null);
     setUploadErr(null);
 
@@ -58,20 +194,12 @@ export default function MediaGallery({
       return;
     }
 
-    if (type === "foto" && !file.type.startsWith("image/")) {
-      setUploadErr("Solo se permiten imagenes.");
-      return;
-    }
-    if (type === "video" && !file.type.startsWith("video/")) {
+    if (!file.type.startsWith("video/")) {
       setUploadErr("Solo se permiten videos.");
       return;
     }
 
-    if (type === "foto" && !canAddFoto) {
-      setUploadErr(`Limite de fotos alcanzado (Plan ${planName}).`);
-      return;
-    }
-    if (type === "video" && !canAddVideo) {
+    if (!canAddVideo) {
       setUploadErr(
         `Limite de videos alcanzado (Plan ${planName}). Mejora tu plan.`,
       );
@@ -81,95 +209,34 @@ export default function MediaGallery({
     setUploading(true);
 
     try {
-      if (type === "foto") {
-        // ✅ Token para que el API route autentique incluso si cookies fallan en Replit
-        const supabase = getSupabase();
-        if (!supabase) {
-          setUploadErr("Supabase no inicializado.");
-          setUploading(false);
-          return;
-        }
+      const supabase = getSupabase();
+      if (!supabase) {
+        setUploadErr("Supabase no inicializado.");
+        setUploading(false);
+        return;
+      }
 
-        const { data: sessionData, error: sessionErr } =
-          await supabase.auth.getSession();
-        const accessToken = sessionData?.session?.access_token || "";
+      const ext = file.name.split(".").pop() || "mp4";
+      const path = `media/${userId}/videos/${Date.now()}.${ext}`;
 
-        if (sessionErr || !accessToken) {
-          setUploadErr("Sesión no válida. Cerrá sesión y volvé a entrar.");
-          setUploading(false);
-          return;
-        }
-
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("userId", userId);
-        formData.append("type", "foto");
-
-        const res = await fetch("/api/upload-media", {
-          method: "POST",
-          body: formData,
-          // ✅ también mandamos cookies por si el server las usa
-          credentials: "include",
-          // ✅ y el Bearer por si cookies NO llegan
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+      const { error } = await supabase.storage
+        .from("media")
+        .upload(path, file, {
+          cacheControl: "3600",
+          upsert: false,
         });
 
-        // Leer respuesta de forma segura (a veces 401 devuelve HTML/texto)
-        const contentType = res.headers.get("content-type") || "";
-        const payload = contentType.includes("application/json")
-          ? await res.json()
-          : { error: await res.text() };
-
-        if (!res.ok) {
-          setUploadErr(
-            "Error al subir: " + (payload?.error || "Error desconocido"),
-          );
-          setUploading(false);
-          return;
-        }
-
-        const newFotos = [...fotos, payload.url];
-        onFotosChange(newFotos);
-
-        // set portada automáticamente si está vacía y es la primera foto
-        if (!coverUrl && newFotos.length === 1) {
-          onCoverChange(payload.url);
-        }
-
-        setUploadMsg("Foto subida correctamente.");
-      } else {
-        // Videos directo a storage (cliente)
-        const supabase = getSupabase();
-        if (!supabase) {
-          setUploadErr("Supabase no inicializado.");
-          setUploading(false);
-          return;
-        }
-
-        const ext = file.name.split(".").pop() || "mp4";
-        const path = `media/${userId}/videos/${Date.now()}.${ext}`;
-
-        const { error } = await supabase.storage
-          .from("media")
-          .upload(path, file, {
-            cacheControl: "3600",
-            upsert: false,
-          });
-
-        if (error) {
-          setUploadErr("Error al subir: " + error.message);
-          setUploading(false);
-          return;
-        }
-
-        const { data: urlData } = supabase.storage
-          .from("media")
-          .getPublicUrl(path);
-        onVideosChange([...videos, urlData.publicUrl]);
-        setUploadMsg("Video subido correctamente.");
+      if (error) {
+        setUploadErr("Error al subir: " + error.message);
+        setUploading(false);
+        return;
       }
+
+      const { data: urlData } = supabase.storage
+        .from("media")
+        .getPublicUrl(path);
+      onVideosChange([...videos, urlData.publicUrl]);
+      setUploadMsg("Video subido correctamente.");
     } catch (err: any) {
       setUploadErr("Error al subir: " + (err?.message || "Error desconocido"));
     }
@@ -219,6 +286,14 @@ export default function MediaGallery({
           style={{ fontSize: "13px", marginBottom: 10 }}
         >
           {uploadMsg}
+        </div>
+      )}
+      {uploading && uploadProgress && (
+        <div
+          className="vv-form-info-box"
+          style={{ fontSize: "13px", marginBottom: 10 }}
+        >
+          {uploadProgress}
         </div>
       )}
 
@@ -342,10 +417,11 @@ export default function MediaGallery({
         ref={fotoRef}
         type="file"
         accept="image/*"
+        multiple
         style={{ display: "none" }}
         onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) uploadFile(f, "foto");
+          const files = e.target.files;
+          if (files && files.length > 0) handleMultiUpload(files);
           e.target.value = "";
         }}
         data-testid="input-upload-foto"
@@ -358,7 +434,7 @@ export default function MediaGallery({
         style={{ display: "none" }}
         onChange={(e) => {
           const f = e.target.files?.[0];
-          if (f) uploadFile(f, "video");
+          if (f) uploadVideo(f);
           e.target.value = "";
         }}
         data-testid="input-upload-video"
@@ -372,10 +448,10 @@ export default function MediaGallery({
           onClick={() => fotoRef.current?.click()}
           data-testid="button-add-foto"
         >
-          {uploading
-            ? "Subiendo..."
+          {uploading && uploadProgress
+            ? uploadProgress
             : canAddFoto
-              ? "Agregar foto"
+              ? "Agregar fotos"
               : `Limite de fotos (${planName})`}
         </button>
 
@@ -387,7 +463,7 @@ export default function MediaGallery({
             onClick={() => videoRef.current?.click()}
             data-testid="button-add-video"
           >
-            {uploading
+            {uploading && !uploadProgress
               ? "Subiendo..."
               : canAddVideo
                 ? "Agregar video"
