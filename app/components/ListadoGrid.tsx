@@ -42,11 +42,11 @@ function PlanBadge({ planId, hasDisponible }: { planId: string; hasDisponible: b
 }
 
 function useIsMobile() {
-  const ref = useRef<boolean | null>(null);
-  if (ref.current === null && typeof window !== "undefined") {
-    ref.current = window.matchMedia("(pointer: coarse)").matches;
-  }
-  return ref.current ?? false;
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    setMobile(window.matchMedia("(pointer: coarse)").matches);
+  }, []);
+  return mobile;
 }
 
 interface ListadoGridProps {
