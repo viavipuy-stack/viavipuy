@@ -14,6 +14,7 @@ import StoryViewer from "./StoryViewer";
 import VerticalGallery from "./VerticalGallery";
 import WhatsAppButton from "./WhatsAppButton";
 import LegalFooter from "./legal/LegalFooter";
+import ApproxMapEmbed from "./ApproxMapEmbed";
 import type { MediaItem } from "./GalleryViewer";
 
 interface Publicacion {
@@ -1435,6 +1436,11 @@ export default function PerfilView({ category, children }: PerfilViewProps & { c
           )}
         </div>
 
+        <ApproxMapEmbed
+          zona={pub.zona}
+          ciudad={pub.ciudad}
+          departamento={pub.departamento}
+        />
         {children}
         <LegalFooter />
 

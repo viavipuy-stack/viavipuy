@@ -6683,6 +6683,37 @@ a {
   }
 }
 
+/* ── Approx Map ── */
+.vv-approx-map {
+  margin: 24px 0 0;
+  padding: 20px 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.vv-approx-map-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 4px;
+}
+.vv-approx-map-subtitle {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.35);
+  margin: 0 0 12px;
+}
+.vv-approx-map-frame {
+  width: 100%;
+  height: 220px;
+  border-radius: 12px;
+  border: 1px solid rgba(198,167,94,0.25);
+  overflow: hidden;
+}
+@media (min-width: 768px) {
+  .vv-approx-map-frame {
+    height: 280px;
+  }
+}
+
 /* ── Zone Header ── */
 .vv-zona-header {
   text-align: center;
