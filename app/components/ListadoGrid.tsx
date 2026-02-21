@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useCallback, useRef, useEffect } from "react";
+import { useMemo, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getPlanConfig } from "@/lib/plans";
 import { fixStorageUrl } from "@/lib/fixStorageUrl";
@@ -59,8 +59,6 @@ export default function ListadoGrid({ items, basePath }: ListadoGridProps) {
   const { favSet, toggleFavorito, loadingIds } = useFavoritos(ids);
   const isMobile = useIsMobile();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
 
   const [previewData, setPreviewData] = useState<{
     fotos: string[];
@@ -119,7 +117,7 @@ export default function ListadoGrid({ items, basePath }: ListadoGridProps) {
           const nombre = item.nombre || "Sin nombre";
           const edad = item.edad || null;
           const zona = item.zona || item.ciudad || "";
-          const disponible = mounted && isDisponibleAhora(item.disponible, item.ultima_actividad);
+          const disponible = isDisponibleAhora(item.disponible, item.ultima_actividad);
           const rating = item.rating != null ? item.rating : 4.8;
           const profileUrl = `${basePath}/${item.id}`;
 
