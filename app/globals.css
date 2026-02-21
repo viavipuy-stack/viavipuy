@@ -6682,3 +6682,63 @@ a {
     margin: 0;
   }
 }
+
+/* ── SEO Locations Block ── */
+.vv-seo-locations {
+  margin: 32px 0 0;
+  padding: 24px 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.vv-seo-locations-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  margin: 0 0 16px;
+  letter-spacing: 0.02em;
+}
+.vv-seo-locations-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+@media (min-width: 600px) {
+  .vv-seo-locations-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 900px) {
+  .vv-seo-locations-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.vv-seo-locations-item {
+  margin: 0;
+  padding: 0;
+}
+.vv-seo-locations-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+.vv-seo-locations-link:hover {
+  background: rgba(198,167,94,0.1);
+}
+.vv-seo-locations-name {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.7);
+  transition: color 0.2s;
+}
+.vv-seo-locations-link:hover .vv-seo-locations-name {
+  color: #c6a75e;
+}
+.vv-seo-locations-count {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.25);
+  font-weight: 400;
+}

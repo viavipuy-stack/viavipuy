@@ -14,6 +14,7 @@ import StoryViewer from "./StoryViewer";
 import VerticalGallery from "./VerticalGallery";
 import WhatsAppButton from "./WhatsAppButton";
 import LegalFooter from "./legal/LegalFooter";
+import SeoLocationsBlock from "./SeoLocationsBlock";
 import type { MediaItem } from "./GalleryViewer";
 
 interface Publicacion {
@@ -1435,6 +1436,7 @@ export default function PerfilView({ category }: PerfilViewProps) {
           )}
         </div>
 
+        <SeoLocationsBlock />
         <LegalFooter />
 
         <div style={{ height: 90 }} />
