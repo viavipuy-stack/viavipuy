@@ -38,6 +38,10 @@ interface Publicacion {
   tarifa_hora?: number;
   acepta_usd?: boolean;
   telefono?: string;
+  telefono_whatsapp?: string | null;
+  telegram_username?: string | null;
+  telefono_visible?: boolean;
+  video_disponible?: boolean;
   servicios?: string[];
   sexo_oral?: string | string[];
   fantasias?: string[];
@@ -91,7 +95,8 @@ function normalizePhone(phone: string): string {
 }
 
 const WA_MSG = "Hola, te contacto desde VIAVIP. ¿Estás disponible?";
-const WA_VIDEO_MSG = "Hola, te contacto desde VIAVIP. Me interesa una videollamada. ¿Estás disponible?";
+const WA_VIDEO_MSG =
+  "Hola, te contacto desde VIAVIP. Me interesa una videollamada. ¿Estás disponible?";
 const TG_MSG = "Hola, te contacto desde VIAVIP. ¿Estás disponible?";
 
 function getWhatsAppUrl(phone: string): string {
@@ -169,12 +174,12 @@ export default function PerfilView({ category }: PerfilViewProps) {
     onlyfans_url?: string | null;
     twitter_url?: string | null;
   }>({});
-  const [contactInfo, setContactInfo] = useState<{
-    telefono_whatsapp?: string | null;
-    telegram_username?: string | null;
-    telefono_visible?: boolean;
-    video_disponible?: boolean;
-  }>({});
+  const contactInfo = {
+    telefono_whatsapp: pub?.telefono_whatsapp ?? null,
+    telegram_username: pub?.telegram_username ?? null,
+    telefono_visible: pub?.telefono_visible ?? false,
+    video_disponible: pub?.video_disponible ?? false,
+  };
   const [servicioLookup, setServicioLookup] = useState<Record<string, string>>(
     {},
   );
@@ -194,7 +199,9 @@ export default function PerfilView({ category }: PerfilViewProps) {
       if (!id) return;
       const supabase = getSupabase();
       if (supabase) {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
         if (user) {
           favModeRef.current = "db";
           const { data } = await supabase
@@ -356,17 +363,13 @@ export default function PerfilView({ category }: PerfilViewProps) {
       if (!supabase) return;
       const { data } = await supabase
         .from("profiles")
-        .select("instagram_url, onlyfans_url, twitter_url, telefono_whatsapp, telegram_username, telefono_visible, video_disponible")
+        .select(
+          "instagram_url, onlyfans_url, twitter_url",
+        )
         .eq("id", pub.user_id)
         .maybeSingle();
       if (data) {
         setSocialLinks(data);
-        setContactInfo({
-          telefono_whatsapp: data.telefono_whatsapp,
-          telegram_username: data.telegram_username,
-          telefono_visible: data.telefono_visible,
-          video_disponible: data.video_disponible,
-        });
       }
     }
     loadSocial();
@@ -542,7 +545,7 @@ export default function PerfilView({ category }: PerfilViewProps) {
         .from("favoritos")
         .upsert(
           { user_id: currentUserId, publicacion_id: id },
-          { onConflict: "user_id,publicacion_id" }
+          { onConflict: "user_id,publicacion_id" },
         );
       if (error) setIsFav(false);
       else if (pub?.user_id)
@@ -688,8 +691,10 @@ export default function PerfilView({ category }: PerfilViewProps) {
   const edad = pub.edad || null;
   const zona = pub.zona || pub.ciudad || "";
   const departamento = pub.departamento || "";
-  const disponible = isDisponibleAhora(pub.disponible, pub.ultima_actividad);
-  const activityLabel = getActivityLabel(pub.ultima_actividad);
+  const disponible = mounted
+    ? isDisponibleAhora(pub.disponible, pub.ultima_actividad)
+    : false;
+  const activityLabel = mounted ? getActivityLabel(pub.ultima_actividad) : null;
   const rating = pub.rating != null ? pub.rating : 4.8;
   const planConfig = getPlanConfig(planId);
   const coverImg = fixStorageUrl(pub.cover_url || "");
@@ -697,9 +702,15 @@ export default function PerfilView({ category }: PerfilViewProps) {
     joinServiceGroups !== null
       ? joinServiceGroups
       : buildLegacyServiceGroups(pub);
-  const hasWhatsApp = !!contactInfo.telefono_whatsapp && contactInfo.telefono_whatsapp.trim().length > 3;
-  const hasTelegram = !!contactInfo.telegram_username && contactInfo.telegram_username.trim().length > 0;
-  const telegramUser = hasTelegram ? contactInfo.telegram_username!.replace(/^@/, "") : "";
+  const hasWhatsApp =
+    !!contactInfo.telefono_whatsapp &&
+    contactInfo.telefono_whatsapp.trim().length > 3;
+  const hasTelegram =
+    !!contactInfo.telegram_username &&
+    contactInfo.telegram_username.trim().length > 0;
+  const telegramUser = hasTelegram
+    ? contactInfo.telegram_username!.replace(/^@/, "")
+    : "";
   const showPhone = hasWhatsApp && contactInfo.telefono_visible === true;
   const hasPhone = !!pub.telefono && pub.telefono.trim().length > 3;
   const atiende = normalizeArray(pub.atiende_en);
@@ -943,7 +954,12 @@ export default function PerfilView({ category }: PerfilViewProps) {
                   });
               }}
             >
-              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                width="20"
+                height="20"
+              >
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
                 <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.96 7.96 0 01-4.11-1.14l-.29-.17-2.87.85.85-2.87-.18-.29A7.96 7.96 0 014 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8z" />
               </svg>
@@ -955,7 +971,12 @@ export default function PerfilView({ category }: PerfilViewProps) {
               disabled
               data-testid="button-whatsapp"
             >
-              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                width="20"
+                height="20"
+              >
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
                 <path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.96 7.96 0 01-4.11-1.14l-.29-.17-2.87.85.85-2.87-.18-.29A7.96 7.96 0 014 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8z" />
               </svg>
@@ -970,8 +991,13 @@ export default function PerfilView({ category }: PerfilViewProps) {
               className="vvp-twin-btn vvp-twin-tg"
               data-testid="button-telegram"
             >
-              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                <path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                width="20"
+                height="20"
+              >
+                <path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
               </svg>
               Telegram
             </a>
@@ -981,8 +1007,13 @@ export default function PerfilView({ category }: PerfilViewProps) {
               disabled
               data-testid="button-telegram"
             >
-              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                <path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                width="20"
+                height="20"
+              >
+                <path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
               </svg>
               Telegram
             </button>
@@ -997,7 +1028,14 @@ export default function PerfilView({ category }: PerfilViewProps) {
             className="vvp-video-badge vvp-video-badge-link"
             data-testid="badge-videollamada"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              width="16"
+              height="16"
+            >
               <polygon points="23 7 16 12 23 17 23 7" />
               <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
             </svg>
@@ -1007,7 +1045,14 @@ export default function PerfilView({ category }: PerfilViewProps) {
 
         {contactInfo.video_disponible && !hasWhatsApp && (
           <div className="vvp-video-badge" data-testid="badge-videollamada">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              width="16"
+              height="16"
+            >
               <polygon points="23 7 16 12 23 17 23 7" />
               <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
             </svg>
@@ -1018,11 +1063,18 @@ export default function PerfilView({ category }: PerfilViewProps) {
         <div className="vvp-data-rows" data-testid="data-rows">
           {showPhone && (
             <div className="vvp-data-row" data-testid="data-telefono">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" />
               </svg>
               <span className="vvp-data-label">Telefono</span>
-              <span className="vvp-data-value">{formatPhone(contactInfo.telefono_whatsapp!)}</span>
+              <span className="vvp-data-value">
+                {formatPhone(contactInfo.telefono_whatsapp!)}
+              </span>
             </div>
           )}
           {zona && (
@@ -1106,7 +1158,9 @@ export default function PerfilView({ category }: PerfilViewProps) {
               <span className="vvp-data-label">Atiende a</span>
               <span className="vvp-data-value">
                 {pub.atiende_a
-                  .map((v) => v === "Hombre" ? "Hombres" : v === "Mujer" ? "Mujeres" : v)
+                  .map((v) =>
+                    v === "Hombre" ? "Hombres" : v === "Mujer" ? "Mujeres" : v,
+                  )
                   .join(", ")}
               </span>
             </div>
@@ -1332,11 +1386,23 @@ export default function PerfilView({ category }: PerfilViewProps) {
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                       </svg>
                     </span>
-                    <span className="vvp-comment-author">{c.autor || "Anonimo"}</span>
+                    <span className="vvp-comment-author">
+                      {c.autor || "Anonimo"}
+                    </span>
                     {c.rating != null && c.rating > 0 && (
-                      <span className="vvp-comment-rating" data-testid={`rating-${c.id}`}>
+                      <span
+                        className="vvp-comment-rating"
+                        data-testid={`rating-${c.id}`}
+                      >
                         {Array.from({ length: 5 }).map((_, i) => (
-                          <svg key={i} viewBox="0 0 24 24" fill={i < c.rating! ? "#c6a75e" : "none"} stroke="#c6a75e" strokeWidth="2" className="vvp-star-icon">
+                          <svg
+                            key={i}
+                            viewBox="0 0 24 24"
+                            fill={i < c.rating! ? "#c6a75e" : "none"}
+                            stroke="#c6a75e"
+                            strokeWidth="2"
+                            className="vvp-star-icon"
+                          >
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                           </svg>
                         ))}
