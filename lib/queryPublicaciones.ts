@@ -13,6 +13,7 @@ export interface PublicacionItem {
   cover_url?: string;
   fotos?: string[];
   fotos_preview?: string[];
+  video_preview_url?: string | null;
   rating?: number;
   disponible?: boolean;
   ultima_actividad?: string;
@@ -34,7 +35,7 @@ export async function fetchPublicaciones(
   try {
     let query = supabase
       .from("publicaciones")
-      .select("id,nombre,edad,departamento,zona,cover_url,fotos,fotos_preview,rating,disponible,ultima_actividad,tarifa_hora,altura_cm,servicios,atiende_en,user_id")
+      .select("id,nombre,edad,departamento,zona,cover_url,fotos,fotos_preview,video_preview_url,rating,disponible,ultima_actividad,tarifa_hora,altura_cm,servicios,atiende_en,user_id")
       .eq("estado", "activa")
       .eq("categoria", categoria);
 
@@ -120,7 +121,7 @@ export async function fetchPublicacionesByZona(
     const dbZona = zona.replaceAll("-", " ");
     const { data: pubs, error: pubError } = await supabase
       .from("publicaciones")
-      .select("id,nombre,edad,departamento,zona,cover_url,fotos,fotos_preview,rating,disponible,ultima_actividad,tarifa_hora,altura_cm,servicios,atiende_en,user_id")
+      .select("id,nombre,edad,departamento,zona,cover_url,fotos,fotos_preview,video_preview_url,rating,disponible,ultima_actividad,tarifa_hora,altura_cm,servicios,atiende_en,user_id")
       .eq("estado", "activa")
       .eq("categoria", categoria)
       .ilike("zona", dbZona)
