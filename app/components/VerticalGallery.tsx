@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import GalleryViewer, { type MediaItem } from "./GalleryViewer";
+import VideoTilePreview from "./VideoTilePreview";
 
 interface VerticalGalleryProps {
   mediaItems: MediaItem[];
@@ -21,14 +22,20 @@ export default function VerticalGallery({ mediaItems }: VerticalGalleryProps) {
   return (
     <>
       <div className="vvg-feed" data-testid="vertical-gallery">
-        {sorted.map((item, i) => (
-          <div
-            key={`media-${i}`}
-            className="vvg-feed-item"
-            onClick={() => setViewerIndex(i)}
-            data-testid={`gallery-item-${i}`}
-          >
-            {item.type === "image" ? (
+        {sorted.map((item, i) =>
+          item.type === "video" ? (
+            <VideoTilePreview
+              key={`media-${i}`}
+              src={item.url}
+              onClickOpen={() => setViewerIndex(i)}
+            />
+          ) : (
+            <div
+              key={`media-${i}`}
+              className="vvg-feed-item"
+              onClick={() => setViewerIndex(i)}
+              data-testid={`gallery-item-${i}`}
+            >
               <img
                 src={item.url}
                 alt={`Foto ${i + 1}`}
@@ -36,22 +43,9 @@ export default function VerticalGallery({ mediaItems }: VerticalGalleryProps) {
                 loading="lazy"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
               />
-            ) : (
-              <video
-                src={item.url}
-                className="vvg-feed-video"
-                preload="metadata"
-                playsInline
-                muted
-              />
-            )}
-            {item.type === "video" && (
-              <div className="vvg-feed-play">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
-              </div>
-            )}
-          </div>
-        ))}
+            </div>
+          ),
+        )}
       </div>
 
       {viewerIndex !== null && (
