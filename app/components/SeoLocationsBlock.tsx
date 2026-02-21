@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LOCATIONS } from "@/lib/locationsCatalog";
+import { FEATURED_LOCATIONS } from "@/lib/locationsCatalog";
 import { fetchLocationCounts } from "@/lib/queryPublicaciones";
 
 export default async function SeoLocationsBlock() {
@@ -9,7 +9,7 @@ export default async function SeoLocationsBlock() {
     <nav className="vv-seo-locations" aria-label="Ubicaciones populares">
       <h2 className="vv-seo-locations-title">Encontra escorts en</h2>
       <ul className="vv-seo-locations-grid">
-        {LOCATIONS.map((loc) => (
+        {FEATURED_LOCATIONS.map((loc) => (
           <li key={loc.slug} className="vv-seo-locations-item">
             <Link
               href={`/mujeres/${loc.slug}`}
