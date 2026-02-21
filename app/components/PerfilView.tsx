@@ -688,8 +688,14 @@ export default function PerfilView({ category }: PerfilViewProps) {
   const edad = pub.edad || null;
   const zona = pub.zona || pub.ciudad || "";
   const departamento = pub.departamento || "";
-  const disponible = isDisponibleAhora(pub.disponible, pub.ultima_actividad);
-  const activityLabel = getActivityLabel(pub.ultima_actividad);
+
+  const [disponible, setDisponible] = useState(false);
+  const [activityLabel, setActivityLabel] = useState<string | null>(null);
+
+  useEffect(() => {
+    setDisponible(isDisponibleAhora(pub.disponible, pub.ultima_actividad));
+    setActivityLabel(getActivityLabel(pub.ultima_actividad));
+  }, [pub.disponible, pub.ultima_actividad]);
   const rating = pub.rating != null ? pub.rating : 4.8;
   const planConfig = getPlanConfig(planId);
   const coverImg = fixStorageUrl(pub.cover_url || "");
