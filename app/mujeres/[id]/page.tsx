@@ -39,7 +39,11 @@ export default async function MujeresIdPage({
   const { id } = await params;
 
   if (UUID_RE.test(id)) {
-    return <PerfilView category="mujeres" />;
+    return (
+      <PerfilView category="mujeres">
+        <SeoLocationsBlock />
+      </PerfilView>
+    );
   }
 
   const zona = slugToName(id);

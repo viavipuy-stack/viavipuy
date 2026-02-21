@@ -1,6 +1,7 @@
 import { getSupabasePublicClient } from "@/lib/supabasePublic";
 import { getPlanConfig } from "@/lib/plans";
 import { isDisponibleAhora } from "@/lib/disponibilidad";
+import { LOCATIONS } from "@/lib/locationsCatalog";
 import type { Filtros } from "@/lib/filters";
 
 export interface PublicacionItem {
@@ -161,5 +162,52 @@ export async function fetchPublicacionesByZona(
     return { items, count: items.length };
   } catch (err: unknown) {
     return { items: [], count: 0, error: err instanceof Error ? err.message : "Error desconocido" };
+  }
+}
+
+export async function fetchLocationCounts(
+  categoria: string = "mujer"
+): Promise<Record<string, number>> {
+  const supabase = getSupabasePublicClient();
+  const counts: Record<string, number> = {};
+  for (const loc of LOCATIONS) counts[loc.slug] = 0;
+  if (!supabase) return counts;
+
+  try {
+    const { data, error } = await supabase
+      .from("publicaciones")
+      .select("departamento,ciudad,zona")
+      .eq("categoria", categoria)
+      .eq("estado", "activa");
+
+    if (error || !data) return counts;
+
+    const strip = (s: string) =>
+      s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+    const catalogNorms = LOCATIONS.map((loc) => ({
+      ...loc,
+      norm: strip(loc.slug.replaceAll("-", " ")),
+    }));
+
+    for (const row of data) {
+      const dep = strip(row.departamento || "");
+      const ciudad = strip(row.ciudad || "");
+      const zona = strip(row.zona || "");
+
+      for (const cat of catalogNorms) {
+        if (
+          (cat.kind === "departamento" && dep === cat.norm) ||
+          (cat.kind === "ciudad" && ciudad === cat.norm) ||
+          (cat.kind === "zona" && zona === cat.norm)
+        ) {
+          counts[cat.slug]++;
+        }
+      }
+    }
+
+    return counts;
+  } catch {
+    return counts;
   }
 }

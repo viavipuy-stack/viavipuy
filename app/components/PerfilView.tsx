@@ -14,7 +14,6 @@ import StoryViewer from "./StoryViewer";
 import VerticalGallery from "./VerticalGallery";
 import WhatsAppButton from "./WhatsAppButton";
 import LegalFooter from "./legal/LegalFooter";
-import SeoLocationsBlock from "./SeoLocationsBlock";
 import type { MediaItem } from "./GalleryViewer";
 
 interface Publicacion {
@@ -127,7 +126,7 @@ function formatPhone(phone: string): string {
   return phone;
 }
 
-export default function PerfilView({ category }: PerfilViewProps) {
+export default function PerfilView({ category, children }: PerfilViewProps & { children?: React.ReactNode }) {
   const params = useParams();
   const id = params?.id as string;
   const [pub, setPub] = useState<Publicacion | null>(null);
@@ -1436,7 +1435,7 @@ export default function PerfilView({ category }: PerfilViewProps) {
           )}
         </div>
 
-        <SeoLocationsBlock />
+        {children}
         <LegalFooter />
 
         <div style={{ height: 90 }} />
