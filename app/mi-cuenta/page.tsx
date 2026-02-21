@@ -314,6 +314,18 @@ export default function MiCuentaPage() {
       .update(payload)
       .eq("id", userId);
 
+    if (!error) {
+      await supabase
+        .from("publicaciones")
+        .update({
+          telefono_whatsapp: payload.telefono_whatsapp,
+          telegram_username: payload.telegram_username,
+          telefono_visible: payload.telefono_visible,
+          video_disponible: payload.video_disponible,
+        })
+        .eq("user_id", userId);
+    }
+
     if (error) {
       setContactMsg({ type: "error", text: `Error: ${error.message}` });
     } else {
