@@ -71,7 +71,7 @@ export default function LoginPage() {
         if (error) {
           setMessage({ type: "error", text: error.message });
         } else {
-          router.push("/publicar");
+          router.push("/mi-cuenta");
           return;
         }
       }
@@ -171,7 +171,7 @@ export default function LoginPage() {
           )}
         </div>
 
-        <a href="/" className="vv-form-back">Volver al inicio</a>
+        <a href="/mi-cuenta" className="vv-form-back">Volver al inicio</a>
       </div>
     </main>
   );

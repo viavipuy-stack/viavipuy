@@ -510,7 +510,7 @@ export default function RegistroPage() {
           </div>
         )}
 
-        <a href="/" className="vv-form-back" style={{ display: "block", marginTop: 24 }}>Volver al inicio</a>
+        <a href="/mi-cuenta" className="vv-form-back" style={{ display: "block", marginTop: 24 }}>Volver al inicio</a>
       </div>
     </main>
   );

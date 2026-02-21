@@ -799,7 +799,7 @@ export default function MiCuentaPage() {
           </div>
         </div>
 
-        <a href="/" className="vv-form-back">Volver al inicio</a>
+        <a href="/mi-cuenta" className="vv-form-back">Volver al inicio</a>
       </div>
     </main>
   );

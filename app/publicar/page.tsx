@@ -1238,7 +1238,7 @@ export default function PublicarPage() {
           </div>
         )}
 
-        <a href="/" className="vv-form-back">
+        <a href="/mi-cuenta" className="vv-form-back">
           Volver al inicio
         </a>
       </div>
