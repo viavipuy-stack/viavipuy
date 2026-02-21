@@ -182,6 +182,9 @@ export default function PerfilView({ category }: PerfilViewProps) {
     ServiceGroup[] | null
   >(null);
 
+  const [disponible, setDisponible] = useState(false);
+  const [activityLabel, setActivityLabel] = useState<string | null>(null);
+
   const principalRef = useRef<HTMLDivElement>(null);
   const serviciosRef = useRef<HTMLDivElement>(null);
   const opinionesRef = useRef<HTMLDivElement>(null);
@@ -216,6 +219,13 @@ export default function PerfilView({ category }: PerfilViewProps) {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (pub) {
+      setDisponible(isDisponibleAhora(pub.disponible, pub.ultima_actividad));
+      setActivityLabel(getActivityLabel(pub.ultima_actividad));
+    }
+  }, [pub?.disponible, pub?.ultima_actividad]);
 
   useEffect(() => {
     async function loadServicioLookup() {
@@ -689,13 +699,6 @@ export default function PerfilView({ category }: PerfilViewProps) {
   const zona = pub.zona || pub.ciudad || "";
   const departamento = pub.departamento || "";
 
-  const [disponible, setDisponible] = useState(false);
-  const [activityLabel, setActivityLabel] = useState<string | null>(null);
-
-  useEffect(() => {
-    setDisponible(isDisponibleAhora(pub.disponible, pub.ultima_actividad));
-    setActivityLabel(getActivityLabel(pub.ultima_actividad));
-  }, [pub.disponible, pub.ultima_actividad]);
   const rating = pub.rating != null ? pub.rating : 4.8;
   const planConfig = getPlanConfig(planId);
   const coverImg = fixStorageUrl(pub.cover_url || "");
