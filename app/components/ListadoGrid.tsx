@@ -9,6 +9,47 @@ import { useFavoritos } from "@/hooks/useFavoritos";
 import FavoritoButton from "./FavoritoButton";
 import MiniPreview from "./MiniPreview";
 
+function CardMedia({ coverUrl, videoPreviewUrl, nombre, mounted }: { coverUrl?: string; videoPreviewUrl?: string | null; nombre: string; mounted: boolean }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoError, setVideoError] = useState(false);
+  const showVideo = mounted && !!videoPreviewUrl && !videoError;
+
+  useEffect(() => {
+    if (showVideo && videoRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+  }, [showVideo]);
+
+  return (
+    <>
+      {coverUrl ? (
+        <img
+          src={fixStorageUrl(coverUrl)}
+          alt={nombre}
+          className="vv-card-img"
+          loading="lazy"
+          style={showVideo ? { position: "absolute", opacity: 0 } : undefined}
+          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+        />
+      ) : <div className="vv-card-img-placeholder" />}
+      {showVideo && (
+        <video
+          ref={videoRef}
+          src={fixStorageUrl(videoPreviewUrl!)}
+          className="vv-card-img"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          style={{ objectFit: "cover" }}
+          onError={() => setVideoError(true)}
+        />
+      )}
+    </>
+  );
+}
+
 interface Publicacion {
   id: string | number;
   nombre?: string;
@@ -18,6 +59,7 @@ interface Publicacion {
   cover_url?: string;
   fotos?: string[];
   fotos_preview?: string[];
+  video_preview_url?: string | null;
   disponible?: boolean;
   ultima_actividad?: string;
   rating?: number;
@@ -138,15 +180,7 @@ export default function ListadoGrid({ items, basePath }: ListadoGridProps) {
                   style={{ cursor: "pointer" }}
                 >
                   <div className="vv-card-img-wrap">
-                    {item.cover_url ? (
-                      <img
-                        src={fixStorageUrl(item.cover_url)}
-                        alt={nombre}
-                        className="vv-card-img"
-                        loading="lazy"
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                      />
-                    ) : <div className="vv-card-img-placeholder" />}
+                    <CardMedia coverUrl={item.cover_url} videoPreviewUrl={item.video_preview_url} nombre={nombre} mounted={mounted} />
                     {disponible && <div className="vv-card-badge vv-card-badge-disponible" data-testid={`badge-disponible-${item.id}`}>Disponible</div>}
                     <PlanBadge planId={item.plan_actual || ""} hasDisponible={disponible} />
                     <div className="vv-card-overlay">
@@ -165,15 +199,7 @@ export default function ListadoGrid({ items, basePath }: ListadoGridProps) {
                   style={{ cursor: "pointer" }}
                 >
                   <div className="vv-card-img-wrap">
-                    {item.cover_url ? (
-                      <img
-                        src={fixStorageUrl(item.cover_url)}
-                        alt={nombre}
-                        className="vv-card-img"
-                        loading="lazy"
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                      />
-                    ) : <div className="vv-card-img-placeholder" />}
+                    <CardMedia coverUrl={item.cover_url} videoPreviewUrl={item.video_preview_url} nombre={nombre} mounted={mounted} />
                     {disponible && <div className="vv-card-badge vv-card-badge-disponible" data-testid={`badge-disponible-${item.id}`}>Disponible</div>}
                     <PlanBadge planId={item.plan_actual || ""} hasDisponible={disponible} />
                     <div className="vv-card-overlay">

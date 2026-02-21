@@ -38,6 +38,7 @@ interface PubData {
   fotos?: string[];
   fotos_preview?: string[];
   videos?: string[];
+  video_preview_url?: string | null;
   servicios?: string[];
   fantasias?: string[];
   servicios_virtuales?: string[];
@@ -110,6 +111,7 @@ export default function MiCuentaPage() {
   const [fotos, setFotos] = useState<string[]>([]);
   const [fotosPreview, setFotosPreview] = useState<string[]>([]);
   const [videos, setVideos] = useState<string[]>([]);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
   const [tags, setTags] = useState<Record<string, string[]>>({
     servicios: [],
@@ -178,7 +180,7 @@ export default function MiCuentaPage() {
 
       const { data: pubData } = await supabase
         .from("publicaciones")
-        .select("id, nombre, edad, descripcion, cover_url, zona, ciudad, disponible, rating, telefono, fotos, fotos_preview, videos, servicios, fantasias, servicios_virtuales, tipos_masajes, idiomas")
+        .select("id, nombre, edad, descripcion, cover_url, zona, ciudad, disponible, rating, telefono, fotos, fotos_preview, videos, video_preview_url, servicios, fantasias, servicios_virtuales, tipos_masajes, idiomas")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -188,6 +190,7 @@ export default function MiCuentaPage() {
         setFotos(Array.isArray(p.fotos) ? p.fotos : []);
         setFotosPreview(Array.isArray(p.fotos_preview) ? p.fotos_preview : []);
         setVideos(Array.isArray(p.videos) ? p.videos : []);
+        setVideoPreviewUrl(p.video_preview_url || "");
         setCoverUrl(p.cover_url || "");
         setDisponibleSwitch(p.disponible !== false);
         setTags({
@@ -230,6 +233,7 @@ export default function MiCuentaPage() {
       fotos: fotos.filter(Boolean),
       videos: videos.filter(Boolean),
       cover_url: coverUrl || null,
+      video_preview_url: videoPreviewUrl || null,
       servicios: tags.servicios,
       fantasias: tags.fantasias,
       servicios_virtuales: tags.servicios_virtuales,
@@ -551,6 +555,8 @@ export default function MiCuentaPage() {
               onVideosChange={setVideos}
               onCoverChange={setCoverUrl}
               coverUrl={coverUrl}
+              videoPreviewUrl={videoPreviewUrl}
+              onVideoPreviewChange={setVideoPreviewUrl}
             />
 
             <div style={{ marginTop: 16 }}>

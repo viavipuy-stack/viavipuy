@@ -22,6 +22,8 @@ interface MediaGalleryProps {
   onVideosChange: (urls: string[]) => void;
   onCoverChange: (url: string) => void;
   coverUrl: string;
+  videoPreviewUrl?: string;
+  onVideoPreviewChange?: (url: string) => void;
 }
 
 export default function MediaGallery({
@@ -35,6 +37,8 @@ export default function MediaGallery({
   onVideosChange,
   onCoverChange,
   coverUrl,
+  videoPreviewUrl,
+  onVideoPreviewChange,
 }: MediaGalleryProps) {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
@@ -255,7 +259,17 @@ export default function MediaGallery({
   }
 
   function removeVideo(index: number) {
+    const url = videos[index];
     onVideosChange(videos.filter((_, i) => i !== index));
+    if (videoPreviewUrl === url && onVideoPreviewChange) {
+      onVideoPreviewChange("");
+    }
+  }
+
+  function setVideoPreview(url: string) {
+    if (onVideoPreviewChange) {
+      onVideoPreviewChange(videoPreviewUrl === url ? "" : url);
+    }
   }
 
   function setCover(url: string) {
@@ -372,44 +386,59 @@ export default function MediaGallery({
 
       {videos.length > 0 && (
         <div className="vv-media-grid" style={{ marginTop: 12 }}>
-          {videos.map((url, i) => (
-            <div
-              key={i}
-              className="vv-media-item vv-media-item-video"
-              data-testid={`media-video-${i}`}
-            >
-              <video
-                src={fixStorageUrl(url)}
-                className="vv-media-thumb"
-                preload="metadata"
-              />
-              <div className="vv-media-video-icon">
-                <svg viewBox="0 0 24 24" fill="#fff" stroke="none">
-                  <polygon points="5 3 19 12 5 21 5 3" />
-                </svg>
-              </div>
-
-              <div className="vv-media-actions">
-                <button
-                  type="button"
-                  className="vv-media-action-btn vv-media-action-delete"
-                  onClick={() => removeVideo(i)}
-                  title="Eliminar"
-                  data-testid={`button-delete-video-${i}`}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
+          {videos.map((url, i) => {
+            const isPreview = videoPreviewUrl === url;
+            return (
+              <div
+                key={i}
+                className={`vv-media-item vv-media-item-video ${isPreview ? "vv-media-item-cover" : ""}`}
+                data-testid={`media-video-${i}`}
+              >
+                <video
+                  src={fixStorageUrl(url)}
+                  className="vv-media-thumb"
+                  preload="metadata"
+                />
+                <div className="vv-media-video-icon">
+                  <svg viewBox="0 0 24 24" fill="#fff" stroke="none">
+                    <polygon points="5 3 19 12 5 21 5 3" />
                   </svg>
-                </button>
+                </div>
+
+                <div className="vv-media-actions">
+                  {onVideoPreviewChange && !isPreview && (
+                    <button
+                      type="button"
+                      className="vv-media-action-btn"
+                      onClick={() => setVideoPreview(url)}
+                      title="Usar como video preview en el listado"
+                      data-testid={`button-set-video-preview-${i}`}
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="vv-media-action-btn vv-media-action-delete"
+                    onClick={() => removeVideo(i)}
+                    title="Eliminar"
+                    data-testid={`button-delete-video-${i}`}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
+
+                {isPreview && (
+                  <div className="vv-media-cover-label">Preview</div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

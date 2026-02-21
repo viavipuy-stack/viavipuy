@@ -100,6 +100,9 @@ The application is built with Next.js 16 using the App Router and TypeScript. St
 - Unified [id] route: UUID → profile page, slug → zone landing page (regex detection)
 - SeoLocationsBlock links updated from query params to clean /mujeres/slug URLs
 - fetchPublicacionesByZona added to queryPublicaciones.ts
+- Added video preview in listing cards: hydration-safe CardMedia component (image on SSR, video on client mount)
+- MediaGallery: "Marcar como preview" button for videos, only 1 per profile, saved as video_preview_url in publicaciones
+- Video autoplay: muted, loop, playsInline, preload="metadata", fallback to image on error
 
 ## Known Issue: Legacy Data
 - Existing publicaciones rows may have incorrect categoria (defaulted to 'mujer'). Run this SQL in Supabase to fix:
