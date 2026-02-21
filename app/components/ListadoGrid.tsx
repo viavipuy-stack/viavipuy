@@ -20,6 +20,22 @@ function CardMedia({ coverUrl, videoPreviewUrl, nombre, mounted }: { coverUrl?: 
     }
   }, [showVideo]);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const LIMIT = 4;
+    const handleTimeUpdate = () => {
+      if (video.currentTime >= LIMIT) {
+        video.currentTime = 0;
+        video.play().catch(() => {});
+      }
+    };
+
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    return () => { video.removeEventListener("timeupdate", handleTimeUpdate); };
+  }, [showVideo]);
+
   return (
     <>
       {coverUrl ? (
