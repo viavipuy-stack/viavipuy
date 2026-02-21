@@ -110,7 +110,8 @@ export async function fetchPublicaciones(
 }
 
 export async function fetchPublicacionesByZona(
-  zona: string
+  zona: string,
+  categoria: "mujer" | "hombre" | "trans" = "mujer"
 ): Promise<{ items: PublicacionItem[]; count: number; error?: string }> {
   const supabase = getSupabasePublicClient();
   if (!supabase) return { items: [], count: 0, error: "Error de configuracion." };
@@ -121,7 +122,7 @@ export async function fetchPublicacionesByZona(
       .from("publicaciones")
       .select("id,nombre,edad,departamento,zona,cover_url,fotos,fotos_preview,rating,disponible,ultima_actividad,tarifa_hora,altura_cm,servicios,atiende_en,user_id")
       .eq("estado", "activa")
-      .eq("categoria", "mujer")
+      .eq("categoria", categoria)
       .ilike("zona", dbZona)
       .order("id", { ascending: false });
 

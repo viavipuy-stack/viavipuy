@@ -2,8 +2,16 @@ import Link from "next/link";
 import { FEATURED_LOCATIONS } from "@/lib/locationsCatalog";
 import { fetchLocationCounts } from "@/lib/queryPublicaciones";
 
-export default async function SeoLocationsBlock() {
-  const counts = await fetchLocationCounts("mujer");
+interface SeoLocationsBlockProps {
+  basePath?: string;
+  categoria?: string;
+}
+
+export default async function SeoLocationsBlock({
+  basePath = "/mujeres",
+  categoria = "mujer",
+}: SeoLocationsBlockProps = {}) {
+  const counts = await fetchLocationCounts(categoria);
 
   return (
     <nav className="vv-seo-locations" aria-label="Ubicaciones populares">
@@ -12,7 +20,7 @@ export default async function SeoLocationsBlock() {
         {FEATURED_LOCATIONS.map((loc) => (
           <li key={loc.slug} className="vv-seo-locations-item">
             <Link
-              href={`/mujeres/${loc.slug}`}
+              href={`${basePath}/${loc.slug}`}
               className="vv-seo-locations-link"
               data-testid={`seo-link-${loc.slug}`}
             >
