@@ -96,6 +96,10 @@ The application is built with Next.js 16 using the App Router and TypeScript. St
 - Added MiniPreview feature: mobile tap card → gallery preview (up to 5 photos, swipe, dots, "Ver perfil" CTA); desktop click → preview; overlay close; scroll lock; portal rendering
 - Premium video badge: gold gradient, glow, pulse animation for "Disponible por videollamada"
 - Contact messages branded: WhatsApp/Telegram prefill "Hola, te contacto desde VIAVIP"
+- SEO zone landing pages: /mujeres/[zona] (e.g., /mujeres/pocitos, /mujeres/punta-del-este) with SSR, dynamic metadata, ILIKE zona matching
+- Unified [id] route: UUID → profile page, slug → zone landing page (regex detection)
+- SeoLocationsBlock links updated from query params to clean /mujeres/slug URLs
+- fetchPublicacionesByZona added to queryPublicaciones.ts
 
 ## Known Issue: Legacy Data
 - Existing publicaciones rows may have incorrect categoria (defaulted to 'mujer'). Run this SQL in Supabase to fix:

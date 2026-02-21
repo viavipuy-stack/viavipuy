@@ -17,7 +17,7 @@ export default function SeoLocationsBlock() {
         {locations.map((loc) => (
           <li key={loc.slug} className="vv-seo-locations-item">
             <Link
-              href={`/mujeres?zona=${loc.slug}`}
+              href={`/mujeres/${loc.slug}`}
               className="vv-seo-locations-link"
               data-testid={`seo-link-${loc.slug}`}
             >

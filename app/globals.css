@@ -6683,6 +6683,31 @@ a {
   }
 }
 
+/* ── Zone Header ── */
+.vv-zona-header {
+  text-align: center;
+  padding: 32px 16px 16px;
+}
+.vv-zona-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px;
+}
+.vv-zona-subtitle {
+  font-size: 0.88rem;
+  color: rgba(255,255,255,0.45);
+  margin: 0;
+  line-height: 1.5;
+}
+.vv-zona-empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: rgba(255,255,255,0.4);
+  font-size: 0.95rem;
+}
+
 /* ── SEO Locations Block ── */
 .vv-seo-locations {
   margin: 32px 0 0;

@@ -107,3 +107,59 @@ export async function fetchPublicaciones(
     return { items: [], count: 0, error: err instanceof Error ? err.message : "Error desconocido" };
   }
 }
+
+export async function fetchPublicacionesByZona(
+  zona: string
+): Promise<{ items: PublicacionItem[]; count: number; error?: string }> {
+  const supabase = getSupabasePublicClient();
+  if (!supabase) return { items: [], count: 0, error: "Error de configuracion." };
+
+  try {
+    const dbZona = zona.replaceAll("-", " ");
+    const { data: pubs, error: pubError } = await supabase
+      .from("publicaciones")
+      .select("id,nombre,edad,departamento,zona,cover_url,fotos,fotos_preview,rating,disponible,ultima_actividad,tarifa_hora,altura_cm,servicios,atiende_en,user_id")
+      .eq("estado", "activa")
+      .eq("categoria", "mujer")
+      .ilike("zona", dbZona)
+      .order("id", { ascending: false });
+
+    if (pubError) return { items: [], count: 0, error: pubError.message };
+
+    const pubList = (pubs || []) as PublicacionItem[];
+    const userIds = pubList.map((p) => p.user_id).filter(Boolean) as string[];
+
+    let planMap: Record<string, string> = {};
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, plan_actual, plan_estado")
+        .in("id", userIds);
+
+      if (profiles) {
+        for (const p of profiles) {
+          planMap[p.id] = p.plan_estado === "activo" ? (p.plan_actual || "free") : "free";
+        }
+      }
+    }
+
+    const items = pubList.map((p) => ({
+      ...p,
+      plan_actual: p.user_id ? planMap[p.user_id] || "free" : "free",
+    }));
+
+    items.sort((a, b) => {
+      const pa = getPlanConfig(a.plan_actual).ranking_priority;
+      const pb = getPlanConfig(b.plan_actual).ranking_priority;
+      if (pb !== pa) return pb - pa;
+      const da = isDisponibleAhora(a.disponible, a.ultima_actividad) ? 1 : 0;
+      const db = isDisponibleAhora(b.disponible, b.ultima_actividad) ? 1 : 0;
+      if (db !== da) return db - da;
+      return (b.rating || 0) - (a.rating || 0);
+    });
+
+    return { items, count: items.length };
+  } catch (err: unknown) {
+    return { items: [], count: 0, error: err instanceof Error ? err.message : "Error desconocido" };
+  }
+}
