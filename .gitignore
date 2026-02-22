@@ -9,3 +9,7 @@ build/
 .env.*.local
 
 attached_assets/
+# Replit / local machine noise
+.cache/
+.local/
+.replit/
