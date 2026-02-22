@@ -13,3 +13,4 @@ attached_assets/
 .cache/
 .local/
 .replit/
+.config/
