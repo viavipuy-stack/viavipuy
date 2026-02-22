@@ -187,18 +187,23 @@ export default function MiCuentaPage() {
       if (pubData) {
         const p = pubData as PubData;
         setPub(p);
-        setFotos(Array.isArray(p.fotos) ? p.fotos : []);
-        setFotosPreview(Array.isArray(p.fotos_preview) ? p.fotos_preview : []);
-        setVideos(Array.isArray(p.videos) ? p.videos : []);
+        const asArr = (v: unknown): string[] => {
+          if (Array.isArray(v)) return v.filter(Boolean);
+          if (typeof v === "string") { try { const parsed = JSON.parse(v); if (Array.isArray(parsed)) return parsed.filter(Boolean); } catch {} }
+          return [];
+        };
+        setFotos(asArr(p.fotos));
+        setFotosPreview(asArr(p.fotos_preview));
+        setVideos(asArr(p.videos));
         setVideoPreviewUrl(p.video_preview_url || "");
         setCoverUrl(p.cover_url || "");
         setDisponibleSwitch(p.disponible !== false);
         setTags({
-          servicios: Array.isArray(p.servicios) ? p.servicios : [],
-          fantasias: Array.isArray(p.fantasias) ? p.fantasias : [],
-          servicios_virtuales: Array.isArray(p.servicios_virtuales) ? p.servicios_virtuales : [],
-          tipos_masajes: Array.isArray(p.tipos_masajes) ? p.tipos_masajes : [],
-          idiomas: Array.isArray(p.idiomas) ? p.idiomas : [],
+          servicios: asArr(p.servicios),
+          fantasias: asArr(p.fantasias),
+          servicios_virtuales: asArr(p.servicios_virtuales),
+          tipos_masajes: asArr(p.tipos_masajes),
+          idiomas: asArr(p.idiomas),
         });
       }
 
@@ -534,7 +539,7 @@ export default function MiCuentaPage() {
           </div>
         )}
 
-        {hasPub && userId && verificado && (
+        {hasPub && userId && (
           <div className="vv-cuenta-section">
             <h2 className="vv-cuenta-label">Galeria de medios</h2>
 
@@ -600,7 +605,7 @@ export default function MiCuentaPage() {
           </div>
         )}
 
-        {hasPub && userId && verificado && fotos.length > 0 && (
+        {hasPub && userId && (
           <div className="vv-cuenta-section">
             <FotosPreviewEditor
               fotosPreview={fotosPreview}

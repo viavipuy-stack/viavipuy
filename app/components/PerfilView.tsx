@@ -1207,15 +1207,18 @@ export default function PerfilView({ category, children }: PerfilViewProps & { c
           </p>
 
           {(() => {
+            const asArr = (v: unknown): string[] => {
+              if (Array.isArray(v)) return v.filter(Boolean);
+              if (typeof v === "string") { try { const p = JSON.parse(v); if (Array.isArray(p)) return p.filter(Boolean); } catch {} }
+              return [];
+            };
             const allFotos: string[] =
-              Array.isArray(pub.fotos) && pub.fotos.length > 0
-                ? pub.fotos
+              asArr(pub.fotos).length > 0
+                ? asArr(pub.fotos)
                 : coverImg
                   ? [coverImg]
                   : [];
-            const allVideos: string[] = Array.isArray(pub.videos)
-              ? pub.videos
-              : [];
+            const allVideos: string[] = asArr(pub.videos);
             const mediaItems: MediaItem[] = [
               ...allFotos.map(
                 (url): MediaItem => ({
@@ -1230,13 +1233,16 @@ export default function PerfilView({ category, children }: PerfilViewProps & { c
                 }),
               ),
             ];
-            if (mediaItems.length === 0) return null;
             return (
               <>
                 <h2 className="vvp-section-title" style={{ marginTop: 24 }}>
                   Galeria
                 </h2>
-                <VerticalGallery mediaItems={mediaItems} />
+                {mediaItems.length > 0 ? (
+                  <VerticalGallery mediaItems={mediaItems} />
+                ) : (
+                  <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.85rem" }}>Aun no hay medios cargados.</p>
+                )}
               </>
             );
           })()}
