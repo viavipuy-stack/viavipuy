@@ -129,7 +129,10 @@ function formatPhone(phone: string): string {
   return phone;
 }
 
-export default function PerfilView({ category, children }: PerfilViewProps & { children?: React.ReactNode }) {
+export default function PerfilView({
+  category,
+  children,
+}: PerfilViewProps & { children?: React.ReactNode }) {
   const params = useParams();
   const id = params?.id as string;
   const [pub, setPub] = useState<Publicacion | null>(null);
@@ -366,9 +369,7 @@ export default function PerfilView({ category, children }: PerfilViewProps & { c
       if (!supabase) return;
       const { data } = await supabase
         .from("profiles")
-        .select(
-          "instagram_url, onlyfans_url, twitter_url",
-        )
+        .select("instagram_url, onlyfans_url, twitter_url")
         .eq("id", pub.user_id)
         .maybeSingle();
       if (data) {
@@ -1100,21 +1101,36 @@ export default function PerfilView({ category, children }: PerfilViewProps & { c
           )}
           {(() => {
             const safeTarifas = (v: unknown): Record<string, number | null> => {
-              if (v && typeof v === "object" && !Array.isArray(v)) return v as Record<string, number | null>;
-              if (typeof v === "string") { try { const p2 = JSON.parse(v); if (p2 && typeof p2 === "object") return p2; } catch {} }
+              if (v && typeof v === "object" && !Array.isArray(v))
+                return v as Record<string, number | null>;
+              if (typeof v === "string") {
+                try {
+                  const p2 = JSON.parse(v);
+                  if (p2 && typeof p2 === "object") return p2;
+                } catch {}
+              }
               return {};
             };
             const tarifasIcon = (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <line x1="12" y1="1" x2="12" y2="23" />
                 <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
               </svg>
             );
             const t = safeTarifas(pub.tarifas);
             const parts: string[] = [];
-            if (t.hora1 != null && t.hora1 !== 0) parts.push(`1 hr: $${t.hora1}`);
-            if (t.min30 != null && t.min30 !== 0) parts.push(`30': $${t.min30}`);
-            if (t.min15 != null && t.min15 !== 0) parts.push(`15': $${t.min15}`);
+            if (t.hora1 != null && t.hora1 !== 0) parts.push(`1 h $${t.hora1}`);
+
+            if (t.min30 != null && t.min30 !== 0)
+              parts.push(`30 min $${t.min30}`);
+
+            if (t.min15 != null && t.min15 !== 0)
+              parts.push(`15 min $${t.min15}`);
 
             let valorText = "Consultar por WhatsApp";
             if (pub.consultar_precio) {
@@ -1214,7 +1230,12 @@ export default function PerfilView({ category, children }: PerfilViewProps & { c
           {(() => {
             const asArr = (v: unknown): string[] => {
               if (Array.isArray(v)) return v.filter(Boolean);
-              if (typeof v === "string") { try { const p = JSON.parse(v); if (Array.isArray(p)) return p.filter(Boolean); } catch {} }
+              if (typeof v === "string") {
+                try {
+                  const p = JSON.parse(v);
+                  if (Array.isArray(p)) return p.filter(Boolean);
+                } catch {}
+              }
               return [];
             };
             const allFotos: string[] =
@@ -1246,7 +1267,14 @@ export default function PerfilView({ category, children }: PerfilViewProps & { c
                 {mediaItems.length > 0 ? (
                   <VerticalGallery mediaItems={mediaItems} />
                 ) : (
-                  <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.85rem" }}>Aun no hay medios cargados.</p>
+                  <p
+                    style={{
+                      color: "rgba(255,255,255,0.4)",
+                      fontSize: "0.85rem",
+                    }}
+                  >
+                    Aun no hay medios cargados.
+                  </p>
                 )}
               </>
             );
