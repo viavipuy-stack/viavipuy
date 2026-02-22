@@ -97,11 +97,7 @@ export default function DestacadasDiamante({ categoria }: Props = {}) {
   return (
     <>
       <section className="vv-stories-section">
-        <div className="vv-section" style={{ paddingBottom: 0 }}>
-          <div className="vv-section-header">
-            <h2 className="vv-section-title">Destacadas</h2>
-          </div>
-        </div>
+        <div aria-hidden="true" style={{ height: 1, width: "100%", background: "#d4af37", opacity: 0.9, margin: "12px 0 14px 0", borderRadius: 1 }} />
         <div className="vv-stories-scroll">
           {stories.map((s, i) => (
             <button
