@@ -1111,53 +1111,25 @@ export default function PerfilView({ category, children }: PerfilViewProps & { c
               </svg>
             );
             const t = safeTarifas(pub.tarifas);
-            const hasRates = t.min15 != null || t.min30 != null || t.hora1 != null;
+            const parts: string[] = [];
+            if (t.hora1 != null && t.hora1 !== 0) parts.push(`1 hr: $${t.hora1}`);
+            if (t.min30 != null && t.min30 !== 0) parts.push(`30': $${t.min30}`);
+            if (t.min15 != null && t.min15 !== 0) parts.push(`15': $${t.min15}`);
 
-            if (pub.consultar_precio || (!hasRates && !pub.tarifa_hora)) {
-              return (
-                <div className="vvp-data-row" data-testid="data-tarifa">
-                  {tarifasIcon}
-                  <span className="vvp-data-label">Tarifa</span>
-                  <span className="vvp-data-value">Consultar por WhatsApp</span>
-                </div>
-              );
-            }
-
-            if (hasRates) {
-              return (
-                <div data-testid="data-tarifa">
-                  {t.min15 != null && (
-                    <div className="vvp-data-row">
-                      {tarifasIcon}
-                      <span className="vvp-data-label">15 min</span>
-                      <span className="vvp-data-value">${t.min15}</span>
-                    </div>
-                  )}
-                  {t.min30 != null && (
-                    <div className="vvp-data-row">
-                      {tarifasIcon}
-                      <span className="vvp-data-label">30 min</span>
-                      <span className="vvp-data-value">${t.min30}</span>
-                    </div>
-                  )}
-                  {t.hora1 != null && (
-                    <div className="vvp-data-row">
-                      {tarifasIcon}
-                      <span className="vvp-data-label">1 hora</span>
-                      <span className="vvp-data-value">${t.hora1}</span>
-                    </div>
-                  )}
-                </div>
-              );
+            let valorText = "Consultar por WhatsApp";
+            if (pub.consultar_precio) {
+              valorText = "Consultar por WhatsApp";
+            } else if (parts.length > 0) {
+              valorText = parts.join(" | ");
+            } else if (pub.tarifa_hora) {
+              valorText = `$${pub.tarifa_hora}${pub.acepta_usd ? " (USD)" : ""} /hora`;
             }
 
             return (
               <div className="vvp-data-row" data-testid="data-tarifa">
                 {tarifasIcon}
                 <span className="vvp-data-label">Tarifa</span>
-                <span className="vvp-data-value">
-                  ${pub.tarifa_hora}{pub.acepta_usd ? " (USD)" : ""} /hora
-                </span>
+                <span className="vvp-data-value">{valorText}</span>
               </div>
             );
           })()}
