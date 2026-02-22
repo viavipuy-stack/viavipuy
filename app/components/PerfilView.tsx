@@ -38,6 +38,8 @@ interface Publicacion {
   horarios?: string;
   tarifa_hora?: number;
   acepta_usd?: boolean;
+  tarifas?: Record<string, number | null> | string | null;
+  consultar_precio?: boolean;
   telefono?: string;
   telefono_whatsapp?: string | null;
   telegram_username?: string | null;
@@ -1096,38 +1098,69 @@ export default function PerfilView({ category, children }: PerfilViewProps & { c
               </span>
             </div>
           )}
-          {pub.tarifa_hora ? (
-            <div className="vvp-data-row" data-testid="data-tarifa">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
+          {(() => {
+            const safeTarifas = (v: unknown): Record<string, number | null> => {
+              if (v && typeof v === "object" && !Array.isArray(v)) return v as Record<string, number | null>;
+              if (typeof v === "string") { try { const p2 = JSON.parse(v); if (p2 && typeof p2 === "object") return p2; } catch {} }
+              return {};
+            };
+            const tarifasIcon = (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="12" y1="1" x2="12" y2="23" />
                 <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
               </svg>
-              <span className="vvp-data-label">Tarifa</span>
-              <span className="vvp-data-value">
-                ${pub.tarifa_hora}
-                {pub.acepta_usd ? " (USD)" : ""} /hora
-              </span>
-            </div>
-          ) : (
-            <div className="vvp-data-row" data-testid="data-tarifa">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <line x1="12" y1="1" x2="12" y2="23" />
-                <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
-              </svg>
-              <span className="vvp-data-label">Tarifa</span>
-              <span className="vvp-data-value">Consultar por WhatsApp</span>
-            </div>
-          )}
+            );
+            const t = safeTarifas(pub.tarifas);
+            const hasRates = t.min15 != null || t.min30 != null || t.hora1 != null;
+
+            if (pub.consultar_precio || (!hasRates && !pub.tarifa_hora)) {
+              return (
+                <div className="vvp-data-row" data-testid="data-tarifa">
+                  {tarifasIcon}
+                  <span className="vvp-data-label">Tarifa</span>
+                  <span className="vvp-data-value">Consultar por WhatsApp</span>
+                </div>
+              );
+            }
+
+            if (hasRates) {
+              return (
+                <div data-testid="data-tarifa">
+                  {t.min15 != null && (
+                    <div className="vvp-data-row">
+                      {tarifasIcon}
+                      <span className="vvp-data-label">15 min</span>
+                      <span className="vvp-data-value">${t.min15}</span>
+                    </div>
+                  )}
+                  {t.min30 != null && (
+                    <div className="vvp-data-row">
+                      {tarifasIcon}
+                      <span className="vvp-data-label">30 min</span>
+                      <span className="vvp-data-value">${t.min30}</span>
+                    </div>
+                  )}
+                  {t.hora1 != null && (
+                    <div className="vvp-data-row">
+                      {tarifasIcon}
+                      <span className="vvp-data-label">1 hora</span>
+                      <span className="vvp-data-value">${t.hora1}</span>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            return (
+              <div className="vvp-data-row" data-testid="data-tarifa">
+                {tarifasIcon}
+                <span className="vvp-data-label">Tarifa</span>
+                <span className="vvp-data-value">
+                  ${pub.tarifa_hora}{pub.acepta_usd ? " (USD)" : ""} /hora
+                </span>
+              </div>
+            );
+          })()}
           {atiende.length > 0 && (
             <div className="vvp-data-row" data-testid="data-atiende-en">
               <svg

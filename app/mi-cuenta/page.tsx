@@ -39,6 +39,8 @@ interface PubData {
   fotos_preview?: string[];
   videos?: string[];
   video_preview_url?: string | null;
+  tarifas?: Record<string, number | null> | string | null;
+  consultar_precio?: boolean;
   servicios?: string[];
   fantasias?: string[];
   servicios_virtuales?: string[];
@@ -132,6 +134,12 @@ export default function MiCuentaPage() {
   const [telegramUsername, setTelegramUsername] = useState("");
   const [telefonoVisible, setTelefonoVisible] = useState(false);
   const [videoDisponible, setVideoDisponible] = useState(false);
+  const [tarifaMin15, setTarifaMin15] = useState("");
+  const [tarifaMin30, setTarifaMin30] = useState("");
+  const [tarifaHora1, setTarifaHora1] = useState("");
+  const [consultarPrecio, setConsultarPrecio] = useState(false);
+  const [savingTarifas, setSavingTarifas] = useState(false);
+  const [tarifasMsg, setTarifasMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [savingContact, setSavingContact] = useState(false);
   const [contactMsg, setContactMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [disponibleSwitch, setDisponibleSwitch] = useState(false);
@@ -180,7 +188,7 @@ export default function MiCuentaPage() {
 
       const { data: pubData } = await supabase
         .from("publicaciones")
-        .select("id, nombre, edad, descripcion, cover_url, zona, ciudad, disponible, rating, telefono, fotos, fotos_preview, videos, video_preview_url, servicios, fantasias, servicios_virtuales, tipos_masajes, idiomas")
+        .select("id, nombre, edad, descripcion, cover_url, zona, ciudad, disponible, rating, telefono, fotos, fotos_preview, videos, video_preview_url, tarifas, consultar_precio, servicios, fantasias, servicios_virtuales, tipos_masajes, idiomas")
         .eq("user_id", user.id)
         .maybeSingle();
 
@@ -196,6 +204,16 @@ export default function MiCuentaPage() {
         setFotosPreview(asArr(p.fotos_preview));
         setVideos(asArr(p.videos));
         setVideoPreviewUrl(p.video_preview_url || "");
+        const safeTarifas = (v: unknown): Record<string, number | null> => {
+          if (v && typeof v === "object" && !Array.isArray(v)) return v as Record<string, number | null>;
+          if (typeof v === "string") { try { const parsed = JSON.parse(v); if (parsed && typeof parsed === "object") return parsed; } catch {} }
+          return {};
+        };
+        const t = safeTarifas(p.tarifas);
+        setTarifaMin15(t.min15 != null ? String(t.min15) : "");
+        setTarifaMin30(t.min30 != null ? String(t.min30) : "");
+        setTarifaHora1(t.hora1 != null ? String(t.hora1) : "");
+        setConsultarPrecio(!!p.consultar_precio);
         setCoverUrl(p.cover_url || "");
         setDisponibleSwitch(p.disponible !== false);
         setTags({
@@ -341,6 +359,32 @@ export default function MiCuentaPage() {
       setContactMsg({ type: "success", text: "Contacto guardado." });
     }
     setSavingContact(false);
+  }
+
+  async function handleSaveTarifas() {
+    if (!pub || !userId) return;
+    setSavingTarifas(true);
+    setTarifasMsg(null);
+    const supabase = getSupabase();
+    if (!supabase) { setSavingTarifas(false); return; }
+
+    const tarifasPayload: Record<string, number | null> = {};
+    if (tarifaMin15.trim()) tarifasPayload.min15 = Number(tarifaMin15);
+    if (tarifaMin30.trim()) tarifasPayload.min30 = Number(tarifaMin30);
+    if (tarifaHora1.trim()) tarifasPayload.hora1 = Number(tarifaHora1);
+
+    const { error } = await supabase
+      .from("publicaciones")
+      .update({ tarifas: tarifasPayload, consultar_precio: consultarPrecio })
+      .eq("id", pub.id)
+      .eq("user_id", userId);
+
+    if (error) {
+      setTarifasMsg({ type: "error", text: `Error: ${error.message}` });
+    } else {
+      setTarifasMsg({ type: "success", text: "Tarifas guardadas." });
+    }
+    setSavingTarifas(false);
   }
 
   async function handleToggleDisponible(value: boolean) {
@@ -730,6 +774,83 @@ export default function MiCuentaPage() {
             {savingContact ? "Guardando..." : "Guardar contacto"}
           </button>
         </div>
+
+        {hasPub && (
+          <div className="vv-cuenta-section">
+            <h2 className="vv-cuenta-label">Tarifas</h2>
+            {tarifasMsg && (
+              <div className={tarifasMsg.type === "error" ? "vv-form-error-box" : "vv-form-success-box"} style={{ fontSize: "13px", marginBottom: 10 }}>
+                {tarifasMsg.text}
+              </div>
+            )}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div className="vv-social-input-row">
+                <label className="vv-social-input-label" htmlFor="input-tarifa-15">15 minutos</label>
+                <input
+                  id="input-tarifa-15"
+                  type="number"
+                  className="vv-social-input"
+                  placeholder="Ej: 1500"
+                  value={tarifaMin15}
+                  onChange={(e) => setTarifaMin15(e.target.value)}
+                  disabled={consultarPrecio}
+                  data-testid="input-tarifa-15"
+                />
+              </div>
+              <div className="vv-social-input-row">
+                <label className="vv-social-input-label" htmlFor="input-tarifa-30">30 minutos</label>
+                <input
+                  id="input-tarifa-30"
+                  type="number"
+                  className="vv-social-input"
+                  placeholder="Ej: 2500"
+                  value={tarifaMin30}
+                  onChange={(e) => setTarifaMin30(e.target.value)}
+                  disabled={consultarPrecio}
+                  data-testid="input-tarifa-30"
+                />
+              </div>
+              <div className="vv-social-input-row">
+                <label className="vv-social-input-label" htmlFor="input-tarifa-hora">1 hora</label>
+                <input
+                  id="input-tarifa-hora"
+                  type="number"
+                  className="vv-social-input"
+                  placeholder="Ej: 4500"
+                  value={tarifaHora1}
+                  onChange={(e) => setTarifaHora1(e.target.value)}
+                  disabled={consultarPrecio}
+                  data-testid="input-tarifa-hora"
+                />
+              </div>
+            </div>
+            <div className="vv-contact-toggles" style={{ marginTop: 10 }}>
+              <label className="vv-toggle-row" data-testid="row-consultar-precio">
+                <span className="vv-toggle-text">Consultar por WhatsApp</span>
+                <input
+                  type="checkbox"
+                  className="vv-toggle-input"
+                  checked={consultarPrecio}
+                  onChange={(e) => setConsultarPrecio(e.target.checked)}
+                  data-testid="toggle-consultar-precio"
+                />
+                <span className={`vv-toggle ${consultarPrecio ? "vv-toggle-on" : ""}`} aria-hidden="true">
+                  <span className="vv-toggle-knob" />
+                </span>
+              </label>
+            </div>
+            <button
+              type="button"
+              className="vv-btn"
+              style={{ width: "100%", marginTop: 14 }}
+              disabled={savingTarifas}
+              onClick={handleSaveTarifas}
+              data-testid="button-save-tarifas"
+            >
+              {savingTarifas ? "Guardando..." : "Guardar tarifas"}
+            </button>
+          </div>
+        )}
 
         <div className="vv-cuenta-section">
           <h2 className="vv-cuenta-label">Redes sociales</h2>
